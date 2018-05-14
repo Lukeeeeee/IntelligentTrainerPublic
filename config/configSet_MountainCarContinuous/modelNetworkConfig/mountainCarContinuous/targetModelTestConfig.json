@@ -1,0 +1,78 @@
+{
+  "CYBER_ENVIRONMENT_STATUS": 1,
+  "GAMMA": 0.99,
+  "NOISE_FLAG": 2,
+  "ACTION_HIGH": [],
+  "STATE_NORMALIZATION": 0,
+  "NOISE_TYPE": "ou_0.0001",
+  "ACTOR_LAYER_CONFIG": [
+    {
+      "B_INIT_VALUE": 0.0,
+      "W_NORMAL_STDDEV": 0.03,
+      "NAME": "1",
+      "N_UNITS": 32,
+      "TYPE": "DENSE",
+      "ACT": "ELU"
+    },
+    {
+      "B_INIT_VALUE": 0.0,
+      "W_NORMAL_STDDEV": 0.03,
+      "NAME": "2",
+      "N_UNITS": 64,
+      "TYPE": "DENSE",
+      "ACT": "ELU"
+    },
+    {
+      "B_INIT_VALUE": "None",
+      "W_NORMAL_STDDEV": 0.03,
+      "NAME": "OUTPUT",
+      "N_UNITS": 1,
+      "TYPE": "DENSE",
+      "ACT": "TANH"
+    }
+  ],
+  "ACTOR_LEARNING_RATE": 0.0001,
+  "LOG_FLAG": 1,
+  "BATCH_SIZE": 256,
+  "CRITIC_LAYER_CONFIG": [
+    {
+      "B_INIT_VALUE": 0.0,
+      "W_NORMAL_STDDEV": 0.03,
+      "NAME": "1",
+      "N_UNITS": 32,
+      "TYPE": "DENSE",
+      "ACT": "ELU"
+    },
+    {
+      "B_INIT_VALUE": 0.0,
+      "W_NORMAL_STDDEV": 0.03,
+      "NAME": "2",
+      "N_UNITS": 128,
+      "TYPE": "DENSE",
+      "ACT": "ELU"
+    },
+    {
+      "B_INIT_VALUE": 0.0,
+      "W_NORMAL_STDDEV": 0.03,
+      "NAME": "OUTPUT",
+      "N_UNITS": 1,
+      "TYPE": "DENSE",
+      "ACT": "IDENTITY"
+    }
+  ],
+  "LAYER_NORM_FLAG": 0,
+  "ACTION_SPACE": [
+    1
+  ],
+  "MEMORY_SIZE_CYBER": 10000,
+  "REAL_ENVIRONMENT_STATUS": 0,
+  "CLIP_NORM": 0,
+  "CRITIC_L2_REG": 0.0,
+  "CRITIC_LEARNING_RATE": 0.001,
+  "ACTION_LOW": [],
+  "TAU": 0.001,
+  "STATE_SPACE": [
+    2
+  ],
+  "MEMORY_SIZE_REAL": 10000
+}

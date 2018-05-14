@@ -1,0 +1,41 @@
+{
+  "STATE_SPACE": [
+    3
+  ],
+  "MEMORY_SIZE": 10000,
+  "OUTPUT_LOW": [],
+  "LOG_FLAG": 1,
+  "ACTION_SPACE": [
+    1
+  ],
+  "LEARNING_RATE": 0.001,
+  "BATCH_SIZE": 128,
+  "OUTPUT_HIGH": [],
+  "NET_CONFIG": [
+    {
+      "B_INIT_VALUE": 0.0,
+      "ACT": "TANH",
+      "W_NORMAL_STDDEV": 0.03,
+      "TYPE": "DENSE",
+      "N_UNITS": 50,
+      "NAME": "1"
+    },
+    {
+      "B_INIT_VALUE": 0.0,
+      "ACT": "TANH",
+      "W_NORMAL_STDDEV": 0.03,
+      "TYPE": "DENSE",
+      "N_UNITS": 50,
+      "NAME": "2"
+    },
+    {
+      "B_INIT_VALUE": 0.0,
+      "ACT": "IDENTITY",
+      "W_NORMAL_STDDEV": 0.03,
+      "TYPE": "DENSE",
+      "N_UNITS": 3,
+      "NAME": "OUPTUT"
+    }
+  ],
+  "NAME": "DynamicsEnvMlpModel"
+}

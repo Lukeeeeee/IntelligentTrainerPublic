@@ -1,0 +1,42 @@
+{
+  "ACTION_SPLIT_COUNT": 2,
+  "DECAY": 0.5,
+  "STATE_SPACE": [
+    1
+  ],
+  "ACTION_SPACE": [
+    3
+  ],
+  "NAME": "TrainerDQN",
+  "DISCOUNT": 0.99,
+  "MEMORY_SIZE": 32,
+  "ITERATION_EVER_EPOCH": 4,
+  "BATCH_SIZE": 8,
+  "LEARNING_RATE": 0.1,
+  "NET_CONFIG": [
+    {
+      "TYPE": "DENSE",
+      "N_UNITS": 8,
+      "NAME": "1",
+      "ACT": "ELU",
+      "B_INIT_VALUE": 0.0,
+      "W_NORMAL_STDDEV": 0.001
+    },
+    {
+      "TYPE": "DENSE",
+      "N_UNITS": 8,
+      "NAME": "2",
+      "ACT": "ELU",
+      "B_INIT_VALUE": 0.0,
+      "W_NORMAL_STDDEV": 0.001
+    },
+    {
+      "TYPE": "DENSE",
+      "N_UNITS": 1,
+      "NAME": "OUPTUT",
+      "ACT": "LINEAR",
+      "B_INIT_VALUE": 0.0,
+      "W_NORMAL_STDDEV": 0.001
+    }
+  ]
+}

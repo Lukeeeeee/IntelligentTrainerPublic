@@ -1,0 +1,94 @@
+{
+  "CRITIC_LAYER_CONFIG": [
+    {
+      "NAME": "1",
+      "B_INIT_VALUE": 0.0,
+      "ACT": "LEAKY_RELU",
+      "TYPE": "DENSE",
+      "W_NORMAL_STDDEV": 0.001,
+      "N_UNITS": 8
+    },
+    {
+      "NAME": "2",
+      "B_INIT_VALUE": 0.0,
+      "ACT": "LEAKY_RELU",
+      "TYPE": "DENSE",
+      "W_NORMAL_STDDEV": 0.001,
+      "N_UNITS": 8
+    },
+    {
+      "NAME": "3",
+      "B_INIT_VALUE": 0.0,
+      "ACT": "LEAKY_RELU",
+      "TYPE": "DENSE",
+      "W_NORMAL_STDDEV": 0.001,
+      "N_UNITS": 8
+    },
+    {
+      "NAME": "OUTPUT",
+      "B_INIT_VALUE": 0.0,
+      "ACT": "IDENTITY",
+      "TYPE": "DENSE",
+      "W_NORMAL_STDDEV": 0.001,
+      "N_UNITS": 1
+    }
+  ],
+  "MEMORY_SIZE_REAL": 10000,
+  "GAMMA": 0.99,
+  "LOG_FLAG": 1,
+  "NOISE_TYPE": "ou_0.0001",
+  "CLIP_NORM": 0,
+  "MEMORY_SIZE_CYBER": 10000,
+  "CYBER_ENVIRONMENT_STATUS": 1,
+  "STATE_SPACE": [
+    3
+  ],
+  "LAYER_NORM_FLAG": 0,
+  "NOISE_FLAG": -1,
+  "ACTOR_LAYER_CONFIG": [
+    {
+      "NAME": "1",
+      "B_INIT_VALUE": 0.0,
+      "ACT": "LEAKY_RELU",
+      "TYPE": "DENSE",
+      "W_NORMAL_STDDEV": 0.001,
+      "N_UNITS": 8
+    },
+    {
+      "NAME": "2",
+      "B_INIT_VALUE": 0.0,
+      "ACT": "LEAKY_RELU",
+      "TYPE": "DENSE",
+      "W_NORMAL_STDDEV": 0.001,
+      "N_UNITS": 8
+    },
+    {
+      "NAME": "3",
+      "B_INIT_VALUE": 0.0,
+      "ACT": "LEAKY_RELU",
+      "TYPE": "DENSE",
+      "W_NORMAL_STDDEV": 0.001,
+      "N_UNITS": 8
+    },
+    {
+      "NAME": "OUTPUT",
+      "B_INIT_VALUE": 0.0,
+      "ACT": "SIGMOID",
+      "TYPE": "DENSE",
+      "W_NORMAL_STDDEV": 0.001,
+      "N_UNITS": 1
+    }
+  ],
+  "REAL_ENVIRONMENT_STATUS": 0,
+  "BATCH_SIZE": 128,
+  "CRITIC_LEARNING_RATE": 0.001,
+  "ACTION_SPACE": [
+    1
+  ],
+  "ACTION_HIGH": [],
+  "ACTION_LOW": [],
+  "CRITIC_L2_REG": 1e-06,
+  "ACTOR_LEARNING_RATE": 0.001,
+  "STATE_NORMALIZATION": 0,
+  "TAU": 0.01
+}

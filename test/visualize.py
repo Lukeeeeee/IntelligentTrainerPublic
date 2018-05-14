@@ -8,11 +8,9 @@ sys.path.append(PAR_PATH)
 
 from src.util.plotter import Plotter
 import matplotlib.pyplot as plt
-from test.dataAnalysis import compute_best_eps_reward
 
 from log.logList import LOG_LIST
 from src.config.config import Config
-import os
 
 
 def test_func1():

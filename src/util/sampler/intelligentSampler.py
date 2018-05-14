@@ -1,6 +1,5 @@
 from src.core import Basic
 import numpy as np
-from src.model.simpleMlpModel.simpleMlpModel import SimpleMlpModel
 from src.config.config import Config
 from config.key import CONFIG_KEY
 import tensorflow as tf
@@ -12,23 +11,7 @@ class IntelligentSampler(Sampler):
 
     def __init__(self, cost_fn, config):
         super().__init__(cost_fn, config)
-        MLP_key_list = Config.load_json(file_path=CONFIG_KEY + '/simpleMlpModelKey.json')
 
-        state_estimate_model_conf = Config(standard_key_list=MLP_key_list,
-                                           config_dict=config.config_dict['STATE_ESTIMATE_MODEL'])
-        state_estimate_model_conf.config_dict['NAME'] = self.config.config_dict['NAME'] + '_STATE_ESTIMATE_MODEL'
-        print("state_estimate_model_conf=", state_estimate_model_conf.config_dict)
-
-        self.state_estimate_model = SimpleMlpModel(config=state_estimate_model_conf)
-        self.state_estimate_model.init()
-
-        dynamics_error_estimate_model_conf = Config(standard_key_list=MLP_key_list, config_dict=config.config_dict[
-            'DYNAMICS_ERROR_ESTIMATE_MODEL'])
-        dynamics_error_estimate_model_conf.config_dict['NAME'] = self.config.config_dict[
-                                                                     'NAME'] + '_DYNAMICS_ERROR_ESTIMATE_MODEL'
-        print("dynamics_error_estimate_model_conf=", dynamics_error_estimate_model_conf)
-        self.dynamics_error_estimate_model = SimpleMlpModel(config=dynamics_error_estimate_model_conf)
-        self.dynamics_error_estimate_model.init()
         self.F1 = 0.5
         self.F2 = 0.5
         self.count_new_real_samples = 0
@@ -72,14 +55,7 @@ class IntelligentSampler(Sampler):
         return state
 
     def train(self, state_est_input, state_est_label, dyn_error_est_input, dyn_error_est_label, *args, **kwargs):
-        sess = tf.get_default_session()
-        for i in range(self.config.config_dict['STEP']):
-            # self.state_estimate_model.update(sess=sess,
-            #                                  input=state_est_input,
-            #                                  label=state_est_label)
-            self.dynamics_error_estimate_model.update(sess=sess,
-                                                      input=dyn_error_est_input,
-                                                      label=dyn_error_est_label)
+        pass
 
     def set_F(self, F1, F2):
         self.F1 = F1
@@ -87,5 +63,3 @@ class IntelligentSampler(Sampler):
 
     def print_log_queue(self, status):
         self.status = status
-        self.state_estimate_model.print_log_queue(status=status)
-        self.dynamics_error_estimate_model.print_log_queue(status=status)

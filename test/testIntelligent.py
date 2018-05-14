@@ -13,7 +13,6 @@ import util.utilNew as ut_new
 from config.envBound import get_bound_file
 import tensorflow as tf
 from src.util.plotter import Plotter
-from config.defaultConfig import DEFAULT_CONFIG
 
 
 def run_single_experiment(game_env_name, cuda_device, config_set_path, model_config_dict, target_model_type,

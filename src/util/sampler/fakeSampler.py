@@ -1,6 +1,5 @@
 from src.core import Basic
 import numpy as np
-from src.model.simpleMlpModel.simpleMlpModel import SimpleMlpModel
 from src.config.config import Config
 from config.key import CONFIG_KEY
 import tensorflow as tf

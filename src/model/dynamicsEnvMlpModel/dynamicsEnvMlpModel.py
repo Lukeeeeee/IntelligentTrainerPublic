@@ -1,4 +1,3 @@
-from src.model.simpleMlpModel.simpleMlpModel import SimpleMlpModel
 import tensorflow as tf
 from src.model.utils.networkCreator import NetworkCreator
 import numpy as np
