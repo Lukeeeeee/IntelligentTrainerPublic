@@ -1,0 +1,10 @@
+[
+  "INPUT_SPACE",
+  "OUTPUT_SPACE",
+  "NET_CONFIG",
+  "NAME",
+  "LEARNING_RATE",
+  "EPOCHS",
+  "BATCH_SIZE",
+  "LOG_FLAG"
+]
