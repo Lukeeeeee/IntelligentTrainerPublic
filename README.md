@@ -9,7 +9,7 @@ So firstly, install `Anaconda 3.6 version`  if you don't have one.
 
 1.1.1 Build a new anaoconda env and install the packages:
 ```bash
-conda create -
+conda env create -f package-list.txt
 source activate intelligenttrainer
 ```
 1.1.2 Install [mujoco 131](http://www.mujoco.org/) and [Mujoco-py](https://github.com/openai/mujoco-py).
@@ -87,3 +87,74 @@ More documents about it will be done in the future.
 ![UML](https://user-images.githubusercontent.com/9161548/40005561-cce1cce6-57ca-11e8-8c11-f9e41e580992.png)
 
 ### 2.1 Some important classes
+2.1.1 The source code was structured in this way: 
+1.	`src/` stores all the source code
+2.	`log/` stores all the log file of each experiments
+3.	`config/` stores all the configuration files like hyper-parameters of neural networks we used during experiments
+4.	`test/` stores all experiments test files
+
+2.1.2
+There are some important classes:
+
+a. `Class Agent (/src/agent/agent.py)`, is the entity for representing an agent in reinforcement learning problem, 
+which is a very common design. Some important methods and attributes are listed below:
+
+i.	`Agent.sample()`: sample some samples from a certain environment
+
+ii.	`Agent.predict()`: get an action from its own model by pass into an observation, the model can be any policies, 
+like DQN, DDPG or random policy. We design this by using strategy pattern in Design Pattern.
+
+iii.`Agent.status`: An attribute stores agents current status, test or train. 
+
+b.	`Class TargetAgent(/src/agent/targetAgent/targetAgent.py)`: is the entity for our target agent in our framework.
+ It inherited from the Class Agent. Some important methods and attributes are listed below:
+
+i.	`TargetAgent.train()`: train its own model, like a DDPG or TRPO
+
+ii.	`TargetAgent.env_status`: a status representing the target agent is sampling from real environment or cyber 
+environment, we use a setter method to modeify this status. The agent’s memory and other environment related attribute
+ will be switched automatically.
+ 
+iii.`TargetAgent.predict()`: We add the epsilon-greedy and action noise in this method
+
+c.	`Class IntelligentTrainerAgent Class IntelligentRandomTrainerAgent Class BaselineTrainerAgent`
+
+All three classes are the entities of our trainer, some design and methods are similar to Class TargetAgent, 
+since all of them is used in a reinforcement learning problem formulation.
+
+f.	`Class BaiscEnv (/src/env/env.py)`: an abstract class for environments, which also inherited from OpenAI gym’s 
+env class. Our cyber environment, training process environment are inherited from BasicEnv
+
+i.	`BasicEnv.step()`: get an action and compute the state transition.
+
+g.	`Class BaselineTrainerEnv(/src/env/trainerEnv/baselineTrainerEnv.py)` is the class where we define the baseline 
+training process and abstract it into an environment.
+
+i.	`BaselineTrainerEnv.step()`: define one step in training process, which include: target agent samples from real
+ environment, cyber environment, and train the cyber environment mode, train the target agent by using real samples and cyber samples, test the cyber environments model and target agent.
+
+h.	`Class TrainerEnv(/src/env/trainerEnv/trainerEnv.py)`: we define the training environment which inherited from 
+BaselineTrainerEnv, and we generate the observation and reward which will return to intelligent trainer 
+agent in this class.
+
+2.	`Class Model(/src/model/model.py)`: We design this class to represent any policy or reinforcement learning 
+algorithms in here based on the strategy design pattern. We implemented the DDPG, DQN, REINFORCE and TRPO here.
+ Also we implement some basic policy, like a policy with fixed output which is used in baseline trainer agent, 
+ the model that dynamics environment used which is a multi-layer neural network.
+
+a.	`Model.predict()`: Get the output of the model by passing into the input.
+
+b.	`Model.update()`: Update the model using its own method
+
+3.	`Class Sampler (src/util/sampler/sampler.py)`: We derived the sampling function from agent to this class, 
+so all agent’s (including target agent, trainer agent) sampling utility is implemented by its won sampler. 
+
+a.	`Sampler.sample()`: the function an agent will call when it wants to sample certain amount of samples 
+from a environment
+
+4.	`Class IntelligentSampler (src/util/sampler/intelligentSampler.py)`: a special sampler inherited from sampler
+ which we used in intelligent trainer agent. It implemented our intelligent reset utility in here.
+
+a.	`IntelligentSampler.reset()`: this reset override the `Class Sampler.sample()`, by using a quality function 
+to select a good initial state.
+
