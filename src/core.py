@@ -158,7 +158,7 @@ class Logger(object):
                 for key, value in dict_i.items():
                     if isinstance(value, np.generic):
                         dict_i[key] = value.item()
-            json.dump(content, fp=f, indent=4)
+            json.dump(content, fp=f, indent=4, sort_keys=True)
 
 
 class GamePlayer(object):

@@ -1,0 +1,25 @@
+{
+  "POLICY_LOGVAR": -1.0,
+  "STATE_SPACE": [
+    8
+  ],
+  "ACTION_SPACE": [
+    2
+  ],
+  "BATCH_SIZE": 5000,
+  "EPISODE_REAL_MEMORY_SIZE": 6000,
+  "ACTION_HIGH": [],
+  "ACTION_LOW": [],
+  "GAMMA": 0.995,
+  "NOISE_TYPE": 0,
+  "NOISE_FLAG": 0,
+  "LAM": 0.98,
+  "KL_TARG": 0.003,
+  "REAL_ENVIRONMENT_STATUS": 0,
+  "LOG_FLAG": 1,
+  "NAME": "target_agent_model",
+  "EPISODE_CYBER_MEMORY_SIZE": 6000,
+  "INCREMENT_ENV_STEP": 0.001,
+  "HIDDEN_MULTIPLE": 10,
+  "CYBER_ENVIRONMENT_STATUS": 1
+}
