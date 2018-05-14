@@ -10,7 +10,7 @@ class FixedOutputModel(Model):
     def __init__(self, config):
         super(FixedOutputModel, self).__init__(config)
 
-    def predict(self, sess, state):
+    def predict(self, sess=None, state=None):
         # baseline mode use fixed policy currently
         action = [0 for i in range(self.config.config_dict['ACTION_SPACE'][0])]
         action[0] = self.config.config_dict['F1']

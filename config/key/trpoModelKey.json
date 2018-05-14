@@ -15,5 +15,6 @@
   "POLICY_LOGVAR",
   "INCREMENT_ENV_STEP",
   "LAM",
-  "GAMMA"
+  "GAMMA",
+  "BATCH_SIZE"
 ]

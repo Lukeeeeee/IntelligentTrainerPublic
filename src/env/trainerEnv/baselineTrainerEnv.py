@@ -128,11 +128,6 @@ class BaselineTrainerEnv(BasicEnv):
 
         self.sample_count += self.config.config_dict['SAMPLE_COUNT_PER_STEP']
 
-        progress_bar = np.floor(1.0 * self.target_agent._real_env_sample_count / self.config.config_dict[
-            'TRAIN_TARGET_AGENT_EVERY_SAMPLE_COUNT'])
-        if progress_bar > self.last_train:
-            self.last_train = progress_bar
-
         print("\nTrain for target agent from real env----------------------")
         self.target_agent.status = self.status_key['TRAIN']
 

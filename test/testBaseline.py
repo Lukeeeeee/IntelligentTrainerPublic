@@ -8,12 +8,10 @@ sys.path.append(CURRENT_PATH)
 PAR_PATH = os.path.abspath(os.path.join(CURRENT_PATH, os.pardir))
 sys.path.append(PAR_PATH)
 from src.env.costDoneFunction import COST_FUNCTION_ENV_DICT, DONE_FUNCTION_ENV_DICT
-from src.env.utils import GAME_ENV_NAME_DICT
 import util.utilNew as ut_new
 from config.envBound import get_bound_file
 import tensorflow as tf
 from src.util.plotter import Plotter
-from config.defaultConfig import DEFAULT_CONFIG
 
 
 def run_single_experiment(game_env_name, cuda_device, config_set_path, model_config_dict, target_model_type, seed=None):
@@ -39,7 +37,6 @@ def run_multiple_experiments(game_env_name, cuda_device, num, config_set_path, m
     log_dir_path = []
     if seed is None:
         seed = [0, 1, 22, 33, 44, 55, 66, 77, 88, 99, 111, 222, 333, 444]
-        # seed = [55, 66, 77, 88, 99, 111]
     for i in range(num):
         tf.reset_default_graph()
         player, sess = ut_new.create_baseline_game(cost_fn=COST_FUNCTION_ENV_DICT[game_env_name],
@@ -60,14 +57,12 @@ def run_multiple_experiments(game_env_name, cuda_device, num, config_set_path, m
         except KeyboardInterrupt:
             player.print_log_to_file()
             player.save_all_model()
-            # TODO fix bug for load model
-            # player.load_all_model()
         sess = tf.get_default_session()
         if sess:
             sess.__exit__(None, None, None)
     for log in log_dir_path:
         print(log)
-    Plotter.plot_multiply_target_agent_reward(path_list=log_dir_path)
+    # Plotter.plot_multiply_target_agent_reward(path_list=log_dir_path)
 
 
 if __name__ == '__main__':
@@ -90,7 +85,7 @@ if __name__ == '__main__':
     #                          cuda_device=0,
     #                          config_set_path=CONFIG_SET_PENDULUM,
     #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_PENDULUM,
-    #                          num=2,
+    #                          num=1,
     #                          target_model_type='DDPG')
 
     # MountainCarContinuous-v0
@@ -103,7 +98,7 @@ if __name__ == '__main__':
 
     # run_multiple_experiments(game_env_name='MountainCarContinuous-v0',
     #                          cuda_device=2,
-    #                          num=2,
+    #                          num=1,
     #                          config_set_path=CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG,
     #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS,
     #                          target_model_type='DDPG')
@@ -117,7 +112,7 @@ if __name__ == '__main__':
 
     # run_multiple_experiments(game_env_name='Reacher-v1',
     #                          cuda_device=2,
-    #                          num=2,
+    #                          num=1,
     #                          config_set_path=CONFIG_SET_REACHER,
     #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_REACHER,
     #                          target_model_type='TRPO')
@@ -131,7 +126,7 @@ if __name__ == '__main__':
 
     # run_multiple_experiments(game_env_name='HalfCheetah',
     #                          cuda_device=2,
-    #                          num=2,
+    #                          num=1,
     #                          config_set_path=CONFIG_SET_HALFCHEETAH,
     #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH,
     #                          target_model_type='TRPO')
@@ -143,10 +138,9 @@ if __name__ == '__main__':
     #                       model_config_dict=MODEL_NET_WORK_CONFIG_DICT_SWIMMER,
     #                       target_model_type='TRPO')
 
-    # run_multiple_experiments(game_env_name='Swimmer-v1',
-    #                          cuda_device=2,
-    #                          num=2,
-    #                          config_set_path=CONFIG_SET_SWIMMER,
-    #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_SWIMMER,
-    #                          target_model_type='TRPO')
-    #
+    run_multiple_experiments(game_env_name='Swimmer-v1',
+                             cuda_device=2,
+                             num=1,
+                             config_set_path=CONFIG_SET_SWIMMER,
+                             model_config_dict=MODEL_NET_WORK_CONFIG_DICT_SWIMMER,
+                             target_model_type='TRPO')

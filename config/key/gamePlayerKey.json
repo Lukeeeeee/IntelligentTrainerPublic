@@ -4,5 +4,6 @@
   "SAVE_CONFIG_FILE_FLAG",
   "GAME_NAME",
   "EPOCH",
-  "STEP"
+  "STEP",
+  "MAX_REAL_ENV_SAMPLE"
 ]

@@ -1,40 +1,40 @@
 {
-  "LEARNING_RATE": 0.001,
   "ACTION_SPACE": [
     1
   ],
+  "BATCH_SIZE": 30,
+  "LEARNING_RATE": 0.001,
+  "LOG_FLAG": 1,
+  "NAME": "DynamicsEnvMlpModel",
   "NET_CONFIG": [
     {
+      "ACT": "TANH",
       "B_INIT_VALUE": 0.0,
-      "W_NORMAL_STDDEV": 0.03,
       "NAME": "1",
       "N_UNITS": 50,
       "TYPE": "DENSE",
-      "ACT": "TANH"
+      "W_NORMAL_STDDEV": 0.03
     },
     {
+      "ACT": "TANH",
       "B_INIT_VALUE": 0.0,
-      "W_NORMAL_STDDEV": 0.03,
       "NAME": "2",
       "N_UNITS": 50,
       "TYPE": "DENSE",
-      "ACT": "TANH"
+      "W_NORMAL_STDDEV": 0.03
     },
     {
+      "ACT": "IDENTITY",
       "B_INIT_VALUE": 0.0,
-      "W_NORMAL_STDDEV": 0.03,
       "NAME": "OUPTUT",
       "N_UNITS": 2,
       "TYPE": "DENSE",
-      "ACT": "IDENTITY"
+      "W_NORMAL_STDDEV": 0.03
     }
   ],
-  "OUTPUT_LOW": [],
-  "NAME": "DynamicsEnvMlpModel",
   "OUTPUT_HIGH": [],
+  "OUTPUT_LOW": [],
   "STATE_SPACE": [
     2
-  ],
-  "LOG_FLAG": 1,
-  "BATCH_SIZE": 30
+  ]
 }
