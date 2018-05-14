@@ -93,7 +93,7 @@ def clear(config_path, model_path, key_dict, save_flag=False):
 
 
 if __name__ == '__main__':
-    clear(config_path='/home/dls/CAP/intelligenttrainerpublic/config/configSet_Swimmer_Intel',
-          model_path='/home/dls/CAP/intelligenttrainerpublic/config/configSet_Swimmer_Intel/modelNetworkConfig/swimmer',
+    clear(config_path='/home/dls/CAP/intelligenttrainerpublic/config/configSet_Swimmer',
+          model_path='/home/dls/CAP/intelligenttrainerpublic/config/configSet_Swimmer/modelNetworkConfig/swimmer',
           key_dict=trpo_key,
           save_flag=False)
