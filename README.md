@@ -84,5 +84,6 @@ More documents about it will be done in the future.
 
 ## 2. Design of codes
 ### 2.1 A very simple UML figure about the desgin of our code.
-![111.pdf](https://github.com/Lukeeeeee/DataCenterJobSchedulingSolution/files/2001346/111.pdf)
+![UML](https://user-images.githubusercontent.com/9161548/40005561-cce1cce6-57ca-11e8-8c11-f9e41e580992.png)
+
 ### 2.1 Some important classes
