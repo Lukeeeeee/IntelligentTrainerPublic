@@ -84,5 +84,5 @@ More documents about it will be done in the future.
 
 ## 2. Design of codes
 ### 2.1 A very simple UML figure about the desgin of our code.
-![UML figure of our code](file:///C:/Users/luke%20dong/Dropbox/NIPS_intelligent_trainer_framework_code_document/UMLGraph/SimplifyModel.svg)
+![111.pdf](https://github.com/Lukeeeeee/DataCenterJobSchedulingSolution/files/2001346/111.pdf)
 ### 2.1 Some important classes
