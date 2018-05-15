@@ -84,7 +84,7 @@ More documents about it will be done in the future.
 
 ## 2. Design of codes
 ### 2.1 A very simple UML figure about the desgin of our code.
-![UML](https://user-images.githubusercontent.com/9161548/40005561-cce1cce6-57ca-11e8-8c11-f9e41e580992.png)
+![main UML](https://user-images.githubusercontent.com/9161548/40037703-37ea380e-5841-11e8-99f2-f760608e34b5.png)
 
 ### 2.1 Some important classes
 2.1.1 The source code was structured in this way: 
