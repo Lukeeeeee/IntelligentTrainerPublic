@@ -12,6 +12,7 @@ import util.utilNew as ut_new
 from config.envBound import get_bound_file
 import tensorflow as tf
 from src.util.plotter import Plotter
+import argparse
 
 
 def run_single_experiment(game_env_name, cuda_device, config_set_path, model_config_dict, target_model_type, seed=None):
@@ -73,74 +74,46 @@ if __name__ == '__main__':
     from config.configSet_HalfCheetah import CONFIG_SET_HALFCHEETAH, MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH
     from config.configSet_Reacher import CONFIG_SET_REACHER, MODEL_NET_WORK_CONFIG_DICT_REACHER
 
-    # Pendulum-v0
-    #
-    # run_single_experiment(game_env_name='Pendulum-v0',
-    #                       cuda_device=0,
-    #                       config_set_path=CONFIG_SET_PENDULUM,
-    #                       model_config_dict=MODEL_NET_WORK_CONFIG_DICT_PENDULUM,
-    #                       target_model_type='DDPG')
-    #
-    # run_multiple_experiments(game_env_name='Pendulum-v0',
-    #                          cuda_device=0,
-    #                          config_set_path=CONFIG_SET_PENDULUM,
-    #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_PENDULUM,
-    #                          num=1,
-    #                          target_model_type='DDPG')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('env',
+                        help='Environment name, could be: Pendulum-v0, MountainCarContinuous-v0, Reacher-v1, HalfCheetah, Swimmer-v1')
+    env_name = parser.parse_args().env
+    if env_name == 'Pendulum-v0':
+        run_multiple_experiments(game_env_name='Pendulum-v0',
+                                 cuda_device=0,
+                                 config_set_path=CONFIG_SET_PENDULUM,
+                                 model_config_dict=MODEL_NET_WORK_CONFIG_DICT_PENDULUM,
+                                 num=10,
+                                 target_model_type='DDPG')
+    elif env_name == 'MountainCarContinuous-v0':
+        run_multiple_experiments(game_env_name='MountainCarContinuous-v0',
+                                 cuda_device=0,
+                                 num=10,
+                                 config_set_path=CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG,
+                                 model_config_dict=MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS,
+                                 target_model_type='DDPG')
+    elif env_name == 'Reacher-v1':
+        run_multiple_experiments(game_env_name='Reacher-v1',
+                                 cuda_device=0,
+                                 num=10,
+                                 config_set_path=CONFIG_SET_REACHER,
+                                 model_config_dict=MODEL_NET_WORK_CONFIG_DICT_REACHER,
+                                 target_model_type='TRPO')
+    elif env_name == 'Swimmer-v1':
+        run_multiple_experiments(game_env_name='Swimmer-v1',
+                                 cuda_device=0,
+                                 num=10,
+                                 config_set_path=CONFIG_SET_SWIMMER,
+                                 model_config_dict=MODEL_NET_WORK_CONFIG_DICT_SWIMMER,
+                                 target_model_type='TRPO')
+    elif env_name == 'HalfCheetah':
+        run_multiple_experiments(game_env_name='HalfCheetah',
+                                 cuda_device=0,
+                                 num=10,
+                                 config_set_path=CONFIG_SET_HALFCHEETAH,
+                                 model_config_dict=MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH,
+                                 target_model_type='TRPO')
 
-    # MountainCarContinuous-v0
-
-    # run_single_experiment(game_env_name='MountainCarContinuous-v0',
-    #                       cuda_device=2,
-    #                       config_set_path=CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG,
-    #                       model_config_dict=MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS,
-    #                       target_model_type='DDPG')
-
-    # run_multiple_experiments(game_env_name='MountainCarContinuous-v0',
-    #                          cuda_device=2,
-    #                          num=1,
-    #                          config_set_path=CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG,
-    #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS,
-    #                          target_model_type='DDPG')
-
-    # # Reacher-v1
-    # run_single_experiment(game_env_name='Reacher-v1',
-    #                       cuda_device=2,
-    #                       config_set_path=CONFIG_SET_REACHER,
-    #                       model_config_dict=MODEL_NET_WORK_CONFIG_DICT_REACHER,
-    #                       target_model_type='TRPO')
-
-    # run_multiple_experiments(game_env_name='Reacher-v1',
-    #                          cuda_device=2,
-    #                          num=1,
-    #                          config_set_path=CONFIG_SET_REACHER,
-    #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_REACHER,
-    #                          target_model_type='TRPO')
-
-    # # HalfCheetah
-    # run_single_experiment(game_env_name='HalfCheetah',
-    #                       cuda_device=2,
-    #                       config_set_path=CONFIG_SET_HALFCHEETAH,
-    #                       model_config_dict=MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH,
-    #                       target_model_type='TRPO')
-
-    # run_multiple_experiments(game_env_name='HalfCheetah',
-    #                          cuda_device=2,
-    #                          num=1,
-    #                          config_set_path=CONFIG_SET_HALFCHEETAH,
-    #                          model_config_dict=MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH,
-    #                          target_model_type='TRPO')
-
-    # # Swimmer
-    # run_single_experiment(game_env_name='Swimmer-v1',
-    #                       cuda_device=2,
-    #                       config_set_path=CONFIG_SET_SWIMMER,
-    #                       model_config_dict=MODEL_NET_WORK_CONFIG_DICT_SWIMMER,
-    #                       target_model_type='TRPO')
-
-    run_multiple_experiments(game_env_name='Swimmer-v1',
-                             cuda_device=2,
-                             num=1,
-                             config_set_path=CONFIG_SET_SWIMMER,
-                             model_config_dict=MODEL_NET_WORK_CONFIG_DICT_SWIMMER,
-                             target_model_type='TRPO')
+    else:
+        raise KeyError(
+            'Wrong env name, please use one of: Pendulum-v0, MountainCarContinuous-v0, Reacher-v1, HalfCheetah, Swimmer-v1')
