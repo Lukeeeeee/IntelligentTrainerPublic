@@ -1,4 +1,4 @@
-name: py3.5
+name: intelligenttrainer
 channels: !!python/tuple
 - defaults
 dependencies:
