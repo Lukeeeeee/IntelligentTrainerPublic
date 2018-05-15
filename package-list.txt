@@ -41,7 +41,6 @@ dependencies:
   - markdown==2.6.11
   - matplotlib==2.2.2
   - mpi4py==3.0.0
-  - mujoco-py==0.5.7
   - networkx==2.1
   - numpy==1.14.2
   - pandas==0.22.0
@@ -68,7 +67,7 @@ dependencies:
   - sklearn==0.0
   - statsmodels==0.8.0
   - tensorboard==1.7.0
-  - tensorflow-gpu==1.7.0
+  - tensorflow==1.7.0
   - tensorlayer==1.8.4
   - termcolor==1.1.0
   - tqdm==4.23.0
