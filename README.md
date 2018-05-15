@@ -84,13 +84,7 @@ python test/testIntelligent.py Pendulum-v0
 
 ####1.2.3 Results and Visualize:
 
-Every time you run experiments, the log file will be stored automatically in the `log/` directory.
-
-Also a json file will be stored in `log/logList`, which stores 10 directories of this test. Because we run 10 times of 
-experiments every time, this will help you to track the results.
-
-After finish one full test (10 experiments), a figure will be generated automatically, 
-which show the Target Agent testing reward (mean reward among 10 experiments)
+Every time you run test, the log file will be stored automatically in the `log/` directory.
 
 `log/baselineTestLog` : the baseline experiments log 
 
@@ -110,6 +104,12 @@ log/.../2018-05-14_17-15-13/loss: record all training process information, like 
 log/.../2018-05-14_17-15-13/model: store all tensorflow model by the end of experiments.
 log/.../2018-05-14_17-15-13/tf: a tensorboard file that store some training information which can be used to monitor the experiments
 ```
+
+Also a json file will be stored in `log/logList`, which stores 10 directories of this test. Because we run 10 times of 
+experiments every time, this will help you to track the results.
+
+After finish one full test (10 experiments), a figure will be generated automatically, 
+which show the Target Agent testing reward (mean reward among 10 experiments)
 
 In `test/visualize.py`, we implement some utilities to visualize the results, this is also we generate the figure we used in our paper.
 More documents about it will be done in the future.
