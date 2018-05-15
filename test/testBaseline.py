@@ -63,7 +63,15 @@ def run_multiple_experiments(game_env_name, cuda_device, num, config_set_path, m
             sess.__exit__(None, None, None)
     for log in log_dir_path:
         print(log)
-    # Plotter.plot_multiply_target_agent_reward(path_list=log_dir_path)
+    from log.logList import LOG_LIST
+    import time
+    import json
+    from test.visualize import plot_all_res
+    log_list_file = LOG_LIST + '/' + game_env_name + '_baseline_log_list_' + time.strftime(
+        "%Y-%m-%d_%H-%M-%S") + '.json'
+    with open(log_list_file, 'w') as f:
+        json.dump(log_dir_path, fp=f, indent=4)
+    plot_all_res([log_list_file], name_list=['baseline_' + env_name])
 
 
 if __name__ == '__main__':
@@ -83,7 +91,7 @@ if __name__ == '__main__':
                                  cuda_device=0,
                                  config_set_path=CONFIG_SET_PENDULUM,
                                  model_config_dict=MODEL_NET_WORK_CONFIG_DICT_PENDULUM,
-                                 num=10,
+                                 num=1,
                                  target_model_type='DDPG')
     elif env_name == 'MountainCarContinuous-v0':
         run_multiple_experiments(game_env_name='MountainCarContinuous-v0',

@@ -7,7 +7,7 @@ We use `Python3.5` and [Anaconda](https://www.anaconda.com/download/) to manage 
 the required packages is listed at the file `package-list.txt`. 
 So firstly, install `Anaconda 3.6 version`  if you don't have one. 
 
-1.1.1 Build a new anaoconda env and install the packages:
+1.1.1 Build a new anaoconda environment and install the packages:
 ```bash
 conda env create -f package-list.txt
 source activate intelligenttrainer
@@ -47,7 +47,7 @@ source activate intelligenttrainer
 
 ```
 1.2.1 Run the baseline experiments
-By run testBaseline.py. our code will run 10 times of experiments with same configuration
+By run testBaseline.py, our code will run 10 times of experiments with same configuration
 but only different seed.
 ```bash
 usage: testBaseline.py [-h] env
@@ -65,7 +65,7 @@ python test/testBaseline.py Pendulum-v0
 ```
 
 1.2.2 Run the intelligent trainer experiments
-By run testIntelligent.py. our code will run 10 times of experiments with same configuration
+By run testIntelligent.py, our code will run 10 times of experiments with same configuration
 but only different seed.
 ```bash
 usage: testIntelligent.py [-h] env
@@ -83,7 +83,13 @@ python test/testIntelligent.py Pendulum-v0
 ```
 
 1.2.3 Results and Visualize:
-Every time you run experiments, the log file will be stored automatically in the `log/` directory.
+
+Every time you run experiments, the log file will be stored automatically in the `log/` directory.\
+Also a json file will be stored in `log/logList`, which stores 10 directories of this test. Because we run 10 times of 
+experiments every time, this will help you to track the results.
+
+After finish one full test (10 experiments), a figure will be generated automatically, 
+which show the Target Agent testing reward (mean reward among 10 experiments)
 
 `log/baselineTestLog` : the baseline experiments log 
 
