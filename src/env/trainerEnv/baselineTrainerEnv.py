@@ -54,6 +54,24 @@ class BaselineTrainerEnv(BasicEnv):
         prob_sample_on_real = action[1]
         prob_train_on_real = action[2]
         # spare_action = action[3]
+        print("\nTrain for target agent from real env----------------------")
+        self.target_agent.status = self.status_key['TRAIN']
+
+        t_r = int(max(self.config.config_dict['TARGET_AGENT_TRAIN_ITERATION'] * 0.6, 1))
+        t_c = int((1 - prob_train_on_real) * t_r / prob_train_on_real)
+
+        total_train = int(t_r + t_c)
+
+        for i in range(total_train):
+            prob = np.random.rand()
+            if prob <= prob_train_on_real:
+                self.target_agent.env_status = self.target_agent.config.config_dict['REAL_ENVIRONMENT_STATUS']
+                res_dict = self.target_agent.train()
+            else:
+                self.target_agent.env_status = self.target_agent.config.config_dict['CYBER_ENVIRONMENT_STATUS']
+                res_dict = self.target_agent.train()
+
+            self.target_agent.print_log_queue(status=self.status_key['TRAIN'])
 
         self.target_agent.sampler.set_F(F1=F1, F2=0.0)
 
@@ -66,24 +84,16 @@ class BaselineTrainerEnv(BasicEnv):
         # self.target_agent.log_queue.queue.clear()
         real_reward_data_this_step = []
         K_r = self.config.config_dict['SAMPLE_COUNT_PER_STEP']
-        # TODO
-        # TOO UGLY OF THIS JUDGE!!!
-        from src.util.sampler.fakeSampler import FakeSampler
-        from src.util.sampler.fakeIntelligentSampler import FakeIntelligentSampler
-        if isinstance(self.target_agent.sampler, (FakeSampler, FakeIntelligentSampler)):
-            sample_count = K_r
-            sample_step = 1
-        else:
-            sample_count = 1
-            sample_step = K_r
-        for i in range(sample_step):
+        for i in range(K_r):
+
             sample_data = self.target_agent.sample(env=self.real_env,
-                                                   sample_count=sample_count,
+                                                   sample_count=1,
                                                    store_flag=True,
                                                    agent_print_log_flag=True)
 
             for j in range(len(sample_data.state_set)):
                 real_reward_data_this_step.append(sample_data.reward_set[j])
+
                 data_dict = {
                     'obs0': sample_data.state_set[j],
                     'obs1': sample_data.new_state_set[j],
@@ -104,20 +114,12 @@ class BaselineTrainerEnv(BasicEnv):
             self.config.config_dict['SAMPLE_COUNT_PER_STEP'] / prob_sample_on_real * (1.0 - prob_sample_on_real))
         if K_c < 1:
             K_c = 1
-
-        if isinstance(self.target_agent.sampler, FakeSampler):
-            sample_count = K_c
-            sample_step = 1
-        else:
-            sample_count = 1
-            sample_step = K_c
-
         self.target_agent.env_status = self.target_agent.config.config_dict['CYBER_ENVIRONMENT_STATUS']
         self.target_agent.status = self.target_agent.status_key['TRAIN']
         # self.target_agent.log_queue.queue.clear()
-        for i in range(sample_step):
+        for i in range(K_c):
             sample_data = self.target_agent.sample(env=self.cyber_env,
-                                                   sample_count=sample_count,
+                                                   sample_count=1,
                                                    store_flag=True,
                                                    agent_print_log_flag=True)
             for j in range(len(sample_data.state_set)):
@@ -127,46 +129,6 @@ class BaselineTrainerEnv(BasicEnv):
         # self.target_agent.print_log_queue(status=self.status_key['TRAIN'])
 
         self.sample_count += self.config.config_dict['SAMPLE_COUNT_PER_STEP']
-
-        print("\nTrain for target agent from real env----------------------")
-        self.target_agent.status = self.status_key['TRAIN']
-
-        critic_loss_set = []
-        actor_loss_set = []
-
-        t_r = int(max(self.config.config_dict['TARGET_AGENT_TRAIN_ITERATION'] * 0.6, 1))
-        t_c = int((1 - prob_train_on_real) * t_r / prob_train_on_real)
-
-        total_train = int(t_r + t_c)
-
-        for i in range(total_train):
-            prob = np.random.rand()
-            if prob <= prob_train_on_real:
-                self.target_agent.env_status = self.target_agent.config.config_dict['REAL_ENVIRONMENT_STATUS']
-                res_dict = self.target_agent.train()
-            else:
-                self.target_agent.env_status = self.target_agent.config.config_dict['CYBER_ENVIRONMENT_STATUS']
-                res_dict = self.target_agent.train()
-
-            self.target_agent.print_log_queue(status=self.status_key['TRAIN'])
-
-            if res_dict is not None:
-                critic_loss_set.append(res_dict['VALUE_FUNCTION_LOSS'])
-                actor_loss_set.append(res_dict['CONTROLLER_LOSS'])
-            else:
-                critic_loss_set.append(0.0)
-                actor_loss_set.append(0.0)
-        self.critic_change = critic_loss_set[-1] + (critic_loss_set[0] - critic_loss_set[-1]) / (
-                np.std(critic_loss_set) + 0.0001)
-        self.actor_change = actor_loss_set[-1] + (actor_loss_set[0] - actor_loss_set[-1]) / (
-                np.std(actor_loss_set) + 0.0001)
-
-        new_critic_loss = np.mean(critic_loss_set)
-        new_actor_loss = np.mean(actor_loss_set)
-        self.critic_change += self.critic_loss - new_critic_loss
-        self.actor_change += self.actor_loss - new_actor_loss
-        self.critic_loss = new_critic_loss
-        self.actor_loss = new_actor_loss
 
         final_step_dynamics_train_loss = -1
 
@@ -194,10 +156,9 @@ class BaselineTrainerEnv(BasicEnv):
             self.target_agent.status = self.status_key['TEST']
             self.target_agent.env_status = self.target_agent.config.config_dict['REAL_ENVIRONMENT_STATUS']
             self.cyber_env.status = self.status_key['TEST']
-            if "DYNAMICS_ENV_TEST_SAMPLE" in self.config.config_dict is False:
-                self.config.config_dict['DYNAMICS_ENV_TEST_SAMPLE'] = 1000
+
             sample_data = self.target_agent.sample(env=self.test_env,
-                                                   sample_count=self.config.config_dict['DYNAMICS_ENV_TEST_SAMPLE'],
+                                                   sample_count=1000,
                                                    store_flag=False,
                                                    agent_print_log_flag=False)
 
