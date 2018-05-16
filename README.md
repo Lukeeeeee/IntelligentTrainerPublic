@@ -14,9 +14,12 @@ source activate intelligenttrainer
 ```
 1.1.2 Install [mujoco 131](http://www.mujoco.org/) and [Mujoco-py](https://github.com/openai/mujoco-py).
 
-For mujoco, you should install mjpro 131, and also register a license. 
+For mujoco, you should install [mjpro 131](https://www.roboti.us/index.html), and also register a [license](https://www.roboti.us/license.html). 
 
-For mujoco-py, run:
+For mujoco-py, firstly follow mujoco-py [github page](https://github.com/openai/mujoco-py#install-mujoco) 
+to do some configuration on your mjpro131 and license,
+
+Then install mujoco-py by running:
 ```bash
 source activate intelligenttrainer
 pip install mujoco-py==0.5.7
@@ -35,15 +38,15 @@ git checkout 1d8565717206e54fca9e73ea1b3969948b464c3c
 pip install -e .
 ```
 
-Install openai baselines by following the official github.
+Install openai baselines by following the its [ithub page](https://github.com/openai/baselines#installation).
 
 
 ### 1.2 Run different experiments
 Firstly activate the anaconda environment:
 ```bash
 source activate intelligenttrainer
-
 ```
+
 ####1.2.1 Run the baseline experiments
 By run testBaseline.py, our code will run 10 times of experiments with same configuration
 but only different seed.
