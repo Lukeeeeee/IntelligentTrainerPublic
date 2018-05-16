@@ -47,7 +47,7 @@ git checkout 1d8565717206e54fca9e73ea1b3969948b464c3c
 pip install -e .
 ```
 
-Install openai baselines by following the its [github page](https://github.com/openai/baselines#installation).
+Install openai baselines by following its [github page](https://github.com/openai/baselines#installation).
 
 
 ### 1.2 Run different experiments
