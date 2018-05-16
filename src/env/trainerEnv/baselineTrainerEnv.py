@@ -84,10 +84,19 @@ class BaselineTrainerEnv(BasicEnv):
         # self.target_agent.log_queue.queue.clear()
         real_reward_data_this_step = []
         K_r = self.config.config_dict['SAMPLE_COUNT_PER_STEP']
-        for i in range(K_r):
 
+        from src.util.sampler.fakeSampler import FakeSampler
+        from src.util.sampler.fakeIntelligentSampler import FakeIntelligentSampler
+        if isinstance(self.target_agent.sampler, (FakeSampler, FakeIntelligentSampler)):
+            sample_count = K_r
+            sample_step = 1
+        else:
+            sample_count = 1
+            sample_step = K_r
+
+        for i in range(sample_step):
             sample_data = self.target_agent.sample(env=self.real_env,
-                                                   sample_count=1,
+                                                   sample_count=sample_count,
                                                    store_flag=True,
                                                    agent_print_log_flag=True)
 
@@ -114,12 +123,20 @@ class BaselineTrainerEnv(BasicEnv):
             self.config.config_dict['SAMPLE_COUNT_PER_STEP'] / prob_sample_on_real * (1.0 - prob_sample_on_real))
         if K_c < 1:
             K_c = 1
+
+        if isinstance(self.target_agent.sampler, (FakeSampler, FakeIntelligentSampler)):
+            sample_count = K_c
+            sample_step = 1
+        else:
+            sample_count = 1
+            sample_step = K_c
+
         self.target_agent.env_status = self.target_agent.config.config_dict['CYBER_ENVIRONMENT_STATUS']
         self.target_agent.status = self.target_agent.status_key['TRAIN']
         # self.target_agent.log_queue.queue.clear()
-        for i in range(K_c):
+        for i in range(sample_step):
             sample_data = self.target_agent.sample(env=self.cyber_env,
-                                                   sample_count=1,
+                                                   sample_count=sample_count,
                                                    store_flag=True,
                                                    agent_print_log_flag=True)
             for j in range(len(sample_data.state_set)):

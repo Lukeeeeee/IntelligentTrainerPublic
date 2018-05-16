@@ -37,8 +37,6 @@ pip install -e .
 
 Install openai baselines by following the official github.
 
-1.1.4 
-
 
 ### 1.2 Run different experiments
 Firstly activate the anaconda environment:
