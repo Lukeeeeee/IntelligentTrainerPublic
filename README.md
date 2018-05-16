@@ -7,11 +7,20 @@ We use `Python3.5` and [Anaconda](https://www.anaconda.com/download/) to manage 
 the required packages is listed at the file `package-list.txt`. 
 So firstly, install `Anaconda 3.6 version`  if you don't have one. 
 
-1.1.1 Build a new anaoconda environment and install the packages:
+1.1.1 First, clone this repository to your local PC.
+
 ```bash
+git clone https://Lukeeeeee@bitbucket.org/RLinRL/intelligenttrainerpublic.git
+```
+
+1.1.2 Build a new anaoconda environment and install the packages:
+
+```bash
+cd path/to/intelligenttrainerpublic
 conda env create -f package-list.txt
 source activate intelligenttrainer
 ```
+
 1.1.2 Install [mujoco 131](http://www.mujoco.org/) and [Mujoco-py](https://github.com/openai/mujoco-py).
 
 For mujoco, you should install [mjpro 131](https://www.roboti.us/index.html), and also register a [license](https://www.roboti.us/license.html). 
@@ -62,6 +71,7 @@ optional arguments:
 
 Examples:
 ```bash
+cd path/to/intelligenttrainerpublic
 python test/testBaseline.py Pendulum-v0
 ```
 
@@ -80,6 +90,7 @@ optional arguments:
 
 Examples:
 ```bash
+cd path/to/intelligenttrainerpublic
 python test/testIntelligent.py Pendulum-v0
 ```
 

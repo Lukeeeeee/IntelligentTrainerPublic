@@ -128,3 +128,5 @@ config/*
 .prof
 
 !bestConfig/
+gym/
+baselines/
