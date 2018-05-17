@@ -58,7 +58,7 @@ Firstly activate the anaconda environment:
 source activate intelligenttrainer
 ```
 
-####1.2.1 Run the baseline experiments
+#### 1.2.1 Run the baseline experiments
 By run testBaseline.py, our code will run 10 times of experiments with same configuration
 but only different seed.
 ```bash
@@ -77,7 +77,7 @@ cd path/to/intelligenttrainerpublic
 python test/testBaseline.py Pendulum-v0
 ```
 
-####1.2.2 Run the intelligent trainer experiments
+#### 1.2.2 Run the intelligent trainer experiments
 By run testIntelligent.py, our code will run 10 times of experiments with same configuration
 but only different seed.
 ```bash
@@ -96,7 +96,7 @@ cd path/to/intelligenttrainerpublic
 python test/testIntelligent.py Pendulum-v0
 ```
 
-####1.2.3 Results and Visualize:
+#### 1.2.3 Results and Visualize:
 
 Every time you run test, the log file will be stored automatically in the `log/` directory.
 
