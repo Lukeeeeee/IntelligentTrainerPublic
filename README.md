@@ -4,7 +4,7 @@
 
 ### 1.1 Install everything
 We use `Python3.5` and [Anaconda](https://www.anaconda.com/download/) to manage the packages, 
-the required packages is listed at the file `package-list.txt`. 
+the required packages are listed at the file `package-list.txt`. 
 So firstly, install `Anaconda 3.6 version`  if you don't have one. 
 
 1.1.1 First, clone this repository to your local PC.
@@ -13,7 +13,7 @@ So firstly, install `Anaconda 3.6 version`  if you don't have one.
 git clone https://Lukeeeeee@bitbucket.org/RLinRL/intelligenttrainerpublic.git
 ```
 
-1.1.2 Build a new anaoconda environment and install the packages:
+1.1.2 Build a new anaconda environment and install the packages:
 
 ```bash
 cd path/to/intelligenttrainerpublic
@@ -26,7 +26,7 @@ source activate intelligenttrainer
 For mujoco, you should install [mjpro 131](https://www.roboti.us/index.html), and also register a [license](https://www.roboti.us/license.html). 
 
 For mujoco-py, firstly follow mujoco-py [github page](https://github.com/openai/mujoco-py#install-mujoco) 
-to do some configuration on your mjpro131 and license,
+to do some configurations on your mjpro131 and license,
 
 Then install mujoco-py by running:
 ```bash
@@ -36,7 +36,7 @@ pip install mujoco-py==0.5.7
 
 1.1.3 Install [OpenAI Gym](https://github.com/openai/gym/) and [OpenAI baselines](https://github.com/openai/baselines)
 
-We use specific version of gym which can support mjpro 131 and mujoco-py 0.5.7 due to compatiblity problem
+We use specific version of gym which can support mjpro 131 and mujoco-py 0.5.7 due to compatibility problem
 
 Install the openai gym by:
 ```bash
@@ -121,7 +121,7 @@ Also a json file will be stored in `log/logList`, which stores 10 directories of
 experiments every time, this will help you to track the results.
 
 After finish one full test (10 experiments), a figure will be generated automatically, 
-which show the Target Agent testing reward (mean reward among 10 experiments)
+which shows the Target Agent testing reward (mean reward among 10 experiments)
 
 In `test/visualize.py`, we implement some utilities to visualize the results, this is also we generate the figure we used in our paper.
 More documents about it will be done in the future.
@@ -157,7 +157,7 @@ b.	`Class TargetAgent(/src/agent/targetAgent/targetAgent.py)`: is the entity for
 i.	`TargetAgent.train()`: train its own model, like a DDPG or TRPO
 
 ii.	`TargetAgent.env_status`: a status representing the target agent is sampling from real environment or cyber 
-environment, we use a setter method to modeify this status. The agent’s memory and other environment related attribute
+environment, we use a setter method to modify this status. The agent’s memory and other environment related attributes
  will be switched automatically.
  
 iii.`TargetAgent.predict()`: We add the epsilon-greedy and action noise in this method
@@ -165,7 +165,7 @@ iii.`TargetAgent.predict()`: We add the epsilon-greedy and action noise in this 
 c.	`Class IntelligentTrainerAgent Class IntelligentRandomTrainerAgent Class BaselineTrainerAgent`
 
 All three classes are the entities of our trainer, some design and methods are similar to Class TargetAgent, 
-since all of them is used in a reinforcement learning problem formulation.
+since all of them are used in a reinforcement learning problem formulation.
 
 f.	`Class BaiscEnv (/src/env/env.py)`: an abstract class for environments, which also inherited from OpenAI gym’s 
 env class. Our cyber environment, training process environment are inherited from BasicEnv
