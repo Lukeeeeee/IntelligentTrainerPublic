@@ -17,7 +17,6 @@ class BasicEnv(gym.Env, Basic):
         self.step_count += 1
 
     def reset(self):
-        # print("%s reset finished" % type(self).__name__)
         return None
 
     def init(self):

@@ -60,5 +60,4 @@ class IntelligentTrainerAgent(Agent):
 
     def init(self):
         # TODO init your agent and your model
-        # this function will be called at the start of the whole train process
         self.model.init()

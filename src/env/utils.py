@@ -7,7 +7,6 @@ import math
 import gym
 
 from collections import deque
-import numpy as np
 
 ENV_MAX_EPOSIDE_STEPS = {
     "MountainCarContinuous-v0": 999,

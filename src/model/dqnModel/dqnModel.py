@@ -69,10 +69,6 @@ class DQNModel(TensorflowBasedModel):
                                    observation_shape=self.config.config_dict['STATE_SPACE'],
                                    action_list=self.action_iterator)
 
-        # self.memory = Memory(limit=int(self.config.config_dict['MEMORY_SIZE']),
-        #                            action_shape=self.config.config_dict['ACTION_SPACE'],
-        #                            observation_shape=self.config.config_dict['STATE_SPACE'])
-
         self.var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self.config.config_dict['NAME'])
 
         self.variables_initializer = tf.variables_initializer(var_list=self.var_list)
@@ -135,7 +131,7 @@ class DQNModel(TensorflowBasedModel):
             Qvalue = (res[0]).reshape([-1, ])
             Qrange = max(Qvalue) - min(Qvalue) + 1e-9
             Qvalue = 0.9 * (Qvalue - min(
-                Qvalue)) + 0.1 * np.random.rand() * Qrange  ###added action noise, to break tie or select some actions that are near optimal.
+                Qvalue)) + 0.1 * np.random.rand() * Qrange
             actions.append(self.action_iterator[np.argmax(Qvalue), :])
             q_value_max.append(np.max(Qvalue))
 

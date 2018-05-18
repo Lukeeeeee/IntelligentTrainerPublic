@@ -58,8 +58,6 @@ class DynamicsEnvMlpModel(TensorflowBasedModel):
                 NetworkCreator.create_network(input=self.input,
                                               network_config=self.config.config_dict['NET_CONFIG'],
                                               net_name=self.config.config_dict['NAME'])
-            # output_low=output_bound[0] - output_bound[1],
-            # output_high=output_bound[1] - output_bound[0])
 
             self.loss, self.optimizer, self.optimize = self.create_training_method()
             self.denorm_delta_state_output = self.delta_state_output * self.output_vars + self.output_means
@@ -159,8 +157,6 @@ class DynamicsEnvMlpModel(TensorflowBasedModel):
 
         state_input = np.reshape(state_input, newshape=[-1] + list(self.config.config_dict['STATE_SPACE']))
         action_input = np.reshape(action_input, newshape=[-1] + list(self.config.config_dict['ACTION_SPACE']))
-        # norm_state_input = (state_input - self.state_scalar.means) / self.state_scalar.vars
-        # norm_action_input = (action_input - self.action_scalar.means) / self.action_scalar.vars
 
         res = sess.run(fetches=[self.output],
                        feed_dict={self.state_input: state_input,

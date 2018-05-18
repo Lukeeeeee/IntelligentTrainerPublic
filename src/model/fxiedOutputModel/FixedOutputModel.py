@@ -16,8 +16,6 @@ class FixedOutputModel(Model):
         action[0] = self.config.config_dict['F1']
         action[1] = self.config.config_dict['PROB_SAMPLE_ON_REAL']
         action[2] = self.config.config_dict['PROB_TRAIN_ON_REAL']
-        # action[3] = 0.0
-        # action[3] = self.config.config_dict['S']
 
         return np.array(action)
 

@@ -10,10 +10,6 @@ from src.config.config import Config
 
 def cheetah_cost_fn(state, action, next_state):
     if len(state.shape) > 1:
-        #        print ("state.shape=", state.shape)
-        #        print ("action.shape=", action.shape)
-        #        print ("next_state.shape=", next_state.shape)
-
         heading_penalty_factor = 10
         scores = np.zeros((state.shape[0],))
 
@@ -157,26 +153,6 @@ def reacher_cost_function(state, next_state, action):
     reward = reward_dist + reward_ctrl
     return reward
 
-
-# def pendulum_cost_function(state, next_state, action):
-#     def angle_normalize(x):
-#         return (((x + np.pi) % (2 * np.pi)) - np.pi)
-#
-#     max_speed = 8
-#     max_torque = 2.
-#     dt = .05
-#
-#     th, thdot = state  # th := theta
-#
-#     g = 10.
-#     m = 1.
-#     l = 1.
-#     dt = dt
-#
-#     u = np.clip(action, -max_torque, max_torque)[0]
-#     costs = angle_normalize(th) ** 2 + .1 * thdot ** 2 + .001 * (u ** 2)
-#     return -costs
-#
 
 COST_FUNCTION_ENV_DICT = {
     "Pendulum-v0": CostFunction(COST_FUNCTION_PATH + '/Pendulum-v0_cost_function_parameters.json',

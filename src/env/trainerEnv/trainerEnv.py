@@ -13,7 +13,6 @@ import pandas as pd
 
 
 def fit_loss(y_data):
-    # data = pd.Series(y_data, index=[str(i) for i in range(len(y_data))])
     data = y_data
     model = AR(data)
     res = model.fit()
@@ -51,7 +50,6 @@ class TrainerEnv(BaselineTrainerEnv):
     def step(self, action):
         print("Trainer action=", action)
         super().step(action=action)
-        # TODO USE THE VALUE TO GENERATE YOUR OWN OBS, ACTION ..
         ln = len(self.target_agent_real_env_reward_deque)
         real_r_his = []
         cyber_r_his = []
@@ -88,26 +86,6 @@ class TrainerEnv(BaselineTrainerEnv):
         return obs, reward, done, info
 
     def _get_reward(self, action):
-        ####concate the useful training info from last td steps
-
-        # re = np.sign(self.real_r_his[-1] - self.real_r_his[
-        #     -2])  # +(real_r_his[-1]-real_r_his[-3]) #+0.00001*(cyber_r_his[-1]-cyber_r_his[-2]) + 0.0001*dyna_err_his[-1]
-        # re += self.critic_change
-        # re += self.actor_change
-        # if (self.cyber_r_his[-1]-self.real_r_his[-1])**2/(self.real_r_his[-1])**2>0.5:
-        #     re -=(2-action[1]-action[2])*(self.cyber_r_his[-1]-self.real_r_his[-1])**2
-
-        # reward_len = len(self.real_r_his)
-        #
-        # if reward_len > 100:
-        #     self.real_r_his = self.real_r_his[-100:]
-        #     reward_len = len(self.real_r_his)
-        # if reward_len - 1 < 50:
-        #     re = np.sign(self.real_r_his[-1] - self.real_r_his[-2])
-        # else:
-        #     y_data = [self.real_r_his[i] for i in range(reward_len - 1)]
-        #     pred_y = fit_loss(y_data=y_data)
-        #     re = np.sign(self.real_r_his[-1] - pred_y)
 
         re = np.sign(self.real_r_his[-1] - self.real_r_his[-2])
 
@@ -116,12 +94,7 @@ class TrainerEnv(BaselineTrainerEnv):
 
     def _get_obs(self):
 
-        re = [np.sign(self.real_r_his[-1] - self.real_r_his[-2]), np.sign(self.real_r_his[-2] - self.real_r_his[-3]),
-              self.dyna_err_his[
-                  -1]]  # [np.sign(self.real_r_his[-1]-self.real_r_his[-2]), np.sign(self.critic_change), np.sign(self.actor_change),]
-        re = [self.dyna_err_his[-1]]
-        re = np.asarray(re)
-        return self.real_r_his[-1]  # re #re #self.target_agent._real_env_sample_count
+        return self.real_r_his[-1]
 
     def reset(self):
         super().reset()

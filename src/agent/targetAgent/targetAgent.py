@@ -121,36 +121,6 @@ class TargetAgent(Agent):
         else:
             res_dict = None
 
-        # TODO add the train process of sampler
-        #
-        # if sampler_train_flag>0 and self._env_status == self.config.config_dict['REAL_ENVIRONMENT_STATUS']:
-        #     self.SamplerTraingCount +=1.0
-        #     ####do the training
-        #     ###get the ne_data from memory
-        #     self.sampler.count_new_real_samples =sampler_train_flag
-        #     new_idx = np.arange(self.model.real_data_memory.observations0.length-self.sampler.count_new_real_samples, self.model.real_data_memory.observations0.length)
-        #     new_data_states = self.model.real_data_memory.observations0.get_batch(new_idx)
-        #     ###get all data from memory
-        #     all_idx = new_idx #np.arange(self.model.real_data_memory.observations0.length)
-        #     all_data_states = self.model.real_data_memory.observations0.get_batch(all_idx)
-        #     all_data_actions = self.model.real_data_memory.actions.get_batch(all_idx)
-        #     all_data_nstates = self.model.real_data_memory.observations1.get_batch(all_idx)
-        #     ####predcit the states
-        #     state_est_input = new_data_states
-        #     state_est_label = self.SamplerTraingCount*np.ones([new_data_states.shape[0],1])
-        #     dyn_error_est_input = all_data_states
-        #     prd_nstates = self.cyber_env.model.predict(sess=self.cyber_env.sess,
-        #                                                state_input=all_data_states,
-        #                                                action_input=all_data_actions)
-        #     ####get the error for each sample
-        #     dyn_error_est_label = np.sum((all_data_nstates-prd_nstates)**2,1)
-        #     ####normalize the error into range [0,1]
-        #     # dyn_error_est_label = (dyn_error_est_label-np.min(dyn_error_est_label))/(np.max(dyn_error_est_label)-np.min(dyn_error_est_label))
-        #     # print("dyn_error_est_label=", dyn_error_est_label)
-        #     dyn_error_est_label = dyn_error_est_label.reshape([-1,1])
-        #     print("state_est_input.shape=", state_est_input.shape)
-        #     print("dyn_error_est_input.shape=", dyn_error_est_input.shape)
-        #     self.sampler.train(state_est_input, state_est_label, dyn_error_est_input, dyn_error_est_label)
         return res_dict
 
     def store_one_sample(self, state, next_state, action, reward, done):

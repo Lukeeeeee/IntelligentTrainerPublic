@@ -15,7 +15,6 @@ class BaselineTrainerEnv(BasicEnv):
 
     def __init__(self, config, cyber_env, real_env, target_agent, test_env):
         super(BaselineTrainerEnv, self).__init__(config=config)
-        # TODO DESIGN THE HIGH AND LOW FOR ACTION AND OBS SPACE
         self.action_space = Box(low=0,
                                 high=1e10,
                                 shape=np.array(self.config.config_dict['ACTION_SPACE']))
@@ -143,8 +142,6 @@ class BaselineTrainerEnv(BasicEnv):
                 cyber_reward_data_this_step.append(sample_data.reward_set[j])
         self.target_agent_cyber_env_reward_deque.append(np.mean(cyber_reward_data_this_step))
 
-        # self.target_agent.print_log_queue(status=self.status_key['TRAIN'])
-
         self.sample_count += self.config.config_dict['SAMPLE_COUNT_PER_STEP']
 
         final_step_dynamics_train_loss = -1
@@ -210,7 +207,6 @@ class BaselineTrainerEnv(BasicEnv):
         return self.observation_space.sample()
 
     def init(self):
-        # Store some init data for dyna env
         self.cyber_env.init()
         self.cyber_env.reset()
         if hasattr(self.real_env, 'init') and callable(self.real_env.init):

@@ -27,19 +27,6 @@ class BaselineTrainerAgent(Agent):
     def __init__(self, config, model, env):
         super(BaselineTrainerAgent, self).__init__(config=config, model=model, env=env)
 
-    # def sample(self, path_nums, horizon):
-    #
-    #     obs = self.env.reset()
-    #     action = self.predict(obs)
-    #
-    #     new_obs, reward, done, info = self.env.step(action)
-    #
-    #     # for i in range(self.config.config_dict['EPOCHS']):
-    #     #     obs = self.env.reset()
-    #     #     action = self.model.predict(obs)
-    #     #     new_obs, reward, done, info = self.env.step(action)
-    #     # pass
-
     def predict(self, state, *args, **kwargs):
         return np.array(self.model.predict(state))
 

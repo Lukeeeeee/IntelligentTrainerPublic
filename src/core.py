@@ -153,7 +153,6 @@ class Logger(object):
 
     def out_to_file(self, file_path, content):
         with open(file_path, 'w') as f:
-            # TODO how to modify this part
             for dict_i in content:
                 for key, value in dict_i.items():
                     if isinstance(value, np.generic):
@@ -213,7 +212,6 @@ class GamePlayer(object):
 
         info_set = []
 
-        # TODO modify here to control the whole training process
         for i in range(self.config.config_dict['EPOCH']):
             for j in range(self.config.config_dict['STEP']):
                 print("\nEPOCH %d, STEP %d" % (i, j))

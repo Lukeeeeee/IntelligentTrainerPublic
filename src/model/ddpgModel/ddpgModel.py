@@ -63,9 +63,6 @@ class DDPGModel(TensorflowBasedModel):
                 elif 'ou' in current_noise_type:
                     _, stddev = current_noise_type.split('_')
                     action_noise = UONoise()
-                    # action_noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(nb_actions),
-                    #                                             sigma=0.2 * np.ones(nb_actions))
-                    # action_noise = UONoise()
                 else:
                     raise RuntimeError('unknown noise type "{}"'.format(current_noise_type))
             self.action_noise = action_noise
@@ -160,11 +157,6 @@ class DDPGModel(TensorflowBasedModel):
         easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_ACTOR_TRAIN_LOSS', value=actor_loss)
         easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_CRITIC_TRAIN_LOSS', value=critic_loss)
         self.compute_grad()
-        # print('\nActor Weight\n')
-        # sess = tf.get_default_session()
-        # print(sess.run(self.ddpg_model.actor.trainable_vars))
-        # print('\nCritic Weight\n')
-        # print(sess.run(self.ddpg_model.critic.trainable_vars))
         return {
             'VALUE_FUNCTION_LOSS': critic_loss,
             'CONTROLLER_LOSS': actor_loss

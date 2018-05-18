@@ -64,9 +64,6 @@ class DynamicsEnv(BasicEnv):
                                    action_input=action)
         state = model_util.squeeze_array(state, dim=1)
 
-        # print(self.observation_space.contains(x=state))
-        # print(state)
-
         state = np.clip(state, a_min=self.observation_space.low, a_max=self.observation_space.high)
 
         reward = self.cost_fn(state=prev_state, action=action, next_state=state)

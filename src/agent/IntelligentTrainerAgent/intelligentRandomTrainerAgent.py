@@ -35,16 +35,10 @@ class IntelligentRandomTrainerAgent(Agent):
     def update(self):
         # TODO finish your own update by using API with self.model
         pass
-        # self.model.update()
 
     def store_one_sample(self, state, next_state, action, reward, done, *arg, **kwargs):
         # TODO store the one sample to whatever you want
 
-        # self.model.store_one_sample(state=state,
-        #                             next_state=next_state,
-        #                             action=action,
-        #                             reward=reward,
-        #                             done=done)
         self.log_file_content.append({
             'STATE': np.array(state).tolist(),
             'NEW_STATE': np.array(next_state).tolist(),
@@ -57,6 +51,4 @@ class IntelligentRandomTrainerAgent(Agent):
 
     def init(self):
         # TODO init your agent and your model
-        # this function will be called at the start of the whole train process
-        # self.model.init()
         pass
