@@ -60,7 +60,8 @@ source activate intelligenttrainer
 
 #### 1.2.1 Run the baseline experiments
 By run testBaseline.py, our code will run 10 times of experiments with same configuration
-but only different seed.
+but only different seed. (If you stopped the test before it fully finished, be sure to kill the process in your system.
+If not, some errors within tensorflow and cuda may appear)
 ```bash
 usage: testBaseline.py [-h] env
 
