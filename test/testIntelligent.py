@@ -98,7 +98,7 @@ if __name__ == '__main__':
                                  cuda_device=0,
                                  config_set_path=CONFIG_SET_PENDULUM_INTEL,
                                  model_config_dict=MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL,
-                                 num=1,
+                                 num=10,
                                  target_model_type='DDPG',
                                  intelligent_trainer_model_type='DQN')
     elif env_name == 'MountainCarContinuous-v0':

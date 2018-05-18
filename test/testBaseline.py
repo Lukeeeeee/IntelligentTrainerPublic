@@ -91,7 +91,7 @@ if __name__ == '__main__':
                                  cuda_device=0,
                                  config_set_path=CONFIG_SET_PENDULUM,
                                  model_config_dict=MODEL_NET_WORK_CONFIG_DICT_PENDULUM,
-                                 num=1,
+                                 num=10,
                                  target_model_type='DDPG')
     elif env_name == 'MountainCarContinuous-v0':
         run_multiple_experiments(game_env_name='MountainCarContinuous-v0',
