@@ -182,7 +182,7 @@ c.	`Class IntelligentTrainerAgent Class IntelligentRandomTrainerAgent Class Base
 All three classes are the entities of our trainer, some design and methods are similar to Class TargetAgent, 
 since all of them are used in a reinforcement learning problem formulation.
 
-f.	`Class BaiscEnv (/src/env/env.py)`: an abstract class for environments, which also inherited from OpenAI gym�s 
+f.	`Class BaiscEnv (/src/env/env.py)`: an abstract class for environments, which also inherited from OpenAI gym's 
 env class. Our cyber environment, training process environment are inherited from BasicEnv
 
 i.	`BasicEnv.step()`: get an action and compute the state transition.
