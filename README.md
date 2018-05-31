@@ -1,4 +1,4 @@
-# Intelligent Trainer: Train the Trainer!
+# Train the Trainer!
 ![CAP](https://user-images.githubusercontent.com/9161548/40165577-eff023c4-59ee-11e8-8bf5-508325a23baa.png)
 ##### Developed by [CAP](http://cap.scse.ntu.edu.sg/)
 The project aims to reduce the algorithm tweak cost for Model-based DRL (MBDRL). 
