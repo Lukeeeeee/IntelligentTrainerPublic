@@ -50,7 +50,7 @@ class TargetAgent(Agent):
             raise KeyError('New Status: %d did not existed' % new_value)
         if new_value == Basic.status_key['TEST'] and self.env_status == self.config.config_dict[
             'REAL_ENVIRONMENT_STATUS']:
-            self.sampler.env_status = ['TEST_ENVIRONMENT_STATUS']
+            self.sampler.env_status = self.sampler.config.config_dict['TEST_ENVIRONMENT_STATUS']
         if self._status == new_value:
             return
         self._status = new_value
