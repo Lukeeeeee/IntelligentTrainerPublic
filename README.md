@@ -1,6 +1,18 @@
-# Intelligent Trainer
+# Train the Trainer!
 ![CAP](https://user-images.githubusercontent.com/9161548/40165577-eff023c4-59ee-11e8-8bf5-508325a23baa.png)
 ##### Developed by [CAP](http://cap.scse.ntu.edu.sg/)
+The project aims to reduce the algorithm tweak cost for Model-based DRL (MBDRL). 
+The approach is to package the standrad MBDRL training process into a RL environment TPE, and design an online trained intelligent trainer to control the sampling and training process inside TPE.
+
+To cite our paper:
+```bash
+@misc{1805.09496,
+Author = {Yuanlong Li and Linsen Dong and Yonggang Wen and Kyle Guan},
+Title = {Intelligent Trainer for Model-Based Reinforcement Learning},
+Year = {2018},
+Eprint = {arXiv:1805.09496},
+}
+```
 
 ## 1. How to use
 
@@ -160,7 +172,7 @@ b.	`Class TargetAgent(/src/agent/targetAgent/targetAgent.py)`: is the entity for
 i.	`TargetAgent.train()`: train its own model, like a DDPG or TRPO
 
 ii.	`TargetAgent.env_status`: a status representing the target agent is sampling from real environment or cyber 
-environment, we use a setter method to modify this status. The agent’s memory and other environment related attributes
+environment, we use a setter method to modify this status. The agent's memory and other environment related attributes
  will be switched automatically.
  
 iii.`TargetAgent.predict()`: We add the epsilon-greedy and action noise in this method
@@ -170,7 +182,7 @@ c.	`Class IntelligentTrainerAgent Class IntelligentRandomTrainerAgent Class Base
 All three classes are the entities of our trainer, some design and methods are similar to Class TargetAgent, 
 since all of them are used in a reinforcement learning problem formulation.
 
-f.	`Class BaiscEnv (/src/env/env.py)`: an abstract class for environments, which also inherited from OpenAI gym’s 
+f.	`Class BaiscEnv (/src/env/env.py)`: an abstract class for environments, which also inherited from OpenAI gym's 
 env class. Our cyber environment, training process environment are inherited from BasicEnv
 
 i.	`BasicEnv.step()`: get an action and compute the state transition.
@@ -195,7 +207,7 @@ a.	`Model.predict()`: Get the output of the model by passing into the input.
 b.	`Model.update()`: Update the model using its own method
 
 3.	`Class Sampler (src/util/sampler/sampler.py)`: We derived the sampling function from agent to this class, 
-so all agent’s (including target agent, trainer agent) sampling utility is implemented by its won sampler. 
+so all agent's (including target agent, trainer agent) sampling utility is implemented by its won sampler. 
 
 a.	`Sampler.sample()`: the function an agent will call when it wants to sample certain amount of samples 
 from a environment
