@@ -1,8 +1,9 @@
+from src.model.simpleMlpModel.simpleMlpModel import SimpleMlpModel
 import tensorflow as tf
 from src.model.utils.networkCreator import NetworkCreator
 import numpy as np
 from src.config.config import Config
-from config.key import CONFIG_KEY
+from conf.key import CONFIG_KEY
 from src.model.model import Model
 import src.model.utils.utils as utl
 from src.model.tensorflowBasedModel import TensorflowBasedModel
@@ -14,7 +15,6 @@ class DynamicsEnvMlpModel(TensorflowBasedModel):
     key_list = Config.load_json(file_path=CONFIG_KEY + '/dynamicsEnvMlpModelKey.json')
 
     def __init__(self, config, output_bound):
-        # TODO ADD NORMALIZATION
         # TODO THE PLACEHODER SHOULD MOVE TO AGENT AND USE IT AS INPUT FOR __init__
         super(DynamicsEnvMlpModel, self).__init__(config)
 
@@ -58,6 +58,8 @@ class DynamicsEnvMlpModel(TensorflowBasedModel):
                 NetworkCreator.create_network(input=self.input,
                                               network_config=self.config.config_dict['NET_CONFIG'],
                                               net_name=self.config.config_dict['NAME'])
+            # output_low=output_bound[0] - output_bound[1],
+            # output_high=output_bound[1] - output_bound[0])
 
             self.loss, self.optimizer, self.optimize = self.create_training_method()
             self.denorm_delta_state_output = self.delta_state_output * self.output_vars + self.output_means
@@ -117,7 +119,6 @@ class DynamicsEnvMlpModel(TensorflowBasedModel):
             total_loss += loss
         average_loss = total_loss / batch_count
         self.log_queue.put({self.name + '_LOSS': average_loss})
-        easy_tf_log.tflog(key=self.name + '_TRAIN_LOSS', value=average_loss)
         return average_loss
 
     def test(self, sess, state_input, action_input, delta_state_label):
@@ -137,24 +138,9 @@ class DynamicsEnvMlpModel(TensorflowBasedModel):
                                    self.output_vars: np.sqrt(self.delta_scalar.vars)
                                    })
 
-        output = sess.run(fetches=self.output,
-                          feed_dict={self.state_input: state_input,
-                                     self.action_input: action_input,
-                                     self.state_delta_label: delta_state_label,
-                                     self.state_vars: np.sqrt(self.state_scalar.vars),
-                                     self.state_means: self.state_scalar.means,
-                                     self.action_vars: np.sqrt(self.action_scalar.vars),
-                                     self.action_means: self.action_scalar.means,
-                                     self.output_means: self.delta_scalar.means,
-                                     self.output_vars: np.sqrt(self.delta_scalar.vars)
-                                     })
-
         self.log_queue.put({self.name + '_LOSS': np.mean(loss)})
-        easy_tf_log.tflog(key=self.name + '_TEST_LOSS', value=loss)
 
     def predict(self, sess, state_input, action_input):
-        # TODO MODIFY THIS RESHAPE PART
-
         state_input = np.reshape(state_input, newshape=[-1] + list(self.config.config_dict['STATE_SPACE']))
         action_input = np.reshape(action_input, newshape=[-1] + list(self.config.config_dict['ACTION_SPACE']))
 
@@ -178,7 +164,7 @@ class DynamicsEnvMlpModel(TensorflowBasedModel):
 
 
 if __name__ == '__main__':
-    from config import CONFIG
+    from conf import CONFIG
 
     conf = Config(standard_key_list=DynamicsEnvMlpModel.key_list)
     conf.load_config(path=CONFIG + '/dynamicsEnvMlpModelTestConfig.json')

@@ -1,11 +1,11 @@
 from src.env.env import BasicEnv
 import numpy as np
 from src.config.config import Config
-from config.key import CONFIG_KEY
+from conf.key import CONFIG_KEY
 from gym.spaces.box import Box
-from src.env.costDoneFunction import cheetah_cost_fn
 import src.model.utils.utils as model_util
 import copy
+import config as cfg
 
 
 class DynamicsEnv(BasicEnv):
@@ -13,11 +13,12 @@ class DynamicsEnv(BasicEnv):
 
     # TODO Modify cost function
 
-    def __init__(self, config, model, sess, max_episode_steps=1000, init_env=None, cost=None, done=None):
+    def __init__(self, config, model, sess, max_episode_steps=1000, init_env=None, cost=None, done=None, reset=None):
         super(DynamicsEnv, self).__init__(config=config)
 
         self.cost_fn = cost
         self.done_fn = done
+        self.reset_fn = reset
 
         if init_env:
             self.action_space = copy.deepcopy(init_env.action_space)
@@ -37,13 +38,25 @@ class DynamicsEnv(BasicEnv):
 
         self.model = model
         self.sess = sess
+        if 'SWIMMER_HORIZON' in cfg.config_dict:
+            self.config.config_dict["MAX_SAMPLE_HORIZON"] = cfg.config_dict['SWIMMER_HORIZON']
         self._max_episode_steps = self.config.config_dict["MAX_SAMPLE_HORIZON"]
+
+        self._max_episode_steps_fixed = self._max_episode_steps
         self._elapsed_steps = 0
         self.state = self.reset()
 
     @property
     def status(self):
         return self._status
+
+    @property
+    def max_step(self):
+        return self.config.config_dict["MAX_SAMPLE_HORIZON"]
+
+    def set_max_step(self, val):
+        assert 0 < val <= self.config.config_dict["MAX_SAMPLE_HORIZON"]
+        self._max_episode_steps = val
 
     @status.setter
     def status(self, new_value):
@@ -70,7 +83,15 @@ class DynamicsEnv(BasicEnv):
         info = None
 
         self._elapsed_steps += 1
+        done = self.done_check(prev_state=prev_state, state=state, action=action)
 
+        if done is True:
+            state = self.reset()
+
+        self.state = state
+        return state, reward, done, info
+
+    def done_check(self, prev_state, state, action):
         if self.done_fn:
             done = self.done_fn(prev_state, state, action)
         else:
@@ -78,13 +99,7 @@ class DynamicsEnv(BasicEnv):
 
         if self._elapsed_steps >= self._max_episode_steps:
             done = True
-            self._elapsed_steps = 0
-
-        if done is True:
-            state = self.reset()
-
-        self.state = state
-        return state, reward, done, info
+        return done
 
     def fit(self, state_set, action_set, delta_state_label_set, sess):
         loss = self.model.update(sess=sess,
@@ -124,7 +139,11 @@ class DynamicsEnv(BasicEnv):
     def reset(self):
         # TODO MODIFY THE RANGE OF
         super().reset()
-        self.state = np.random.random_sample(size=list(self.observation_space.shape))
+        self._elapsed_steps = 0
+        if self.reset_fn:
+            self.state = self.reset_fn()
+        else:
+            self.state = self.observation_space.sample()
         return self.state
 
     def init(self):
@@ -134,7 +153,7 @@ class DynamicsEnv(BasicEnv):
 
 
 if __name__ == '__main__':
-    from config import CONFIG
+    from conf import CONFIG
     from src.model.dynamicsEnvMlpModel.dynamicsEnvMlpModel import DynamicsEnvMlpModel
     import tensorflow as tf
 

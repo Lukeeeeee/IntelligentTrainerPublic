@@ -69,6 +69,7 @@ class NNValueFunction(object):
                 self.var_list.append(var)
         self.init_op = tf.variables_initializer(var_list=self.var_list)
 
+
     def fit(self, x, y, logger=None):
         """ Fit model to current data batch + previous data batch
 
@@ -124,3 +125,12 @@ class NNValueFunction(object):
 
     def init(self):
         self.sess.run(self.init_op)
+
+    def copy_weight(self, new_val):
+        t_change = []
+        assert len(new_val.var_list) == len(self.var_list)
+        for i in range(len(new_val.var_list)):
+            t_change.append(-new_val.var_list[i] + self.var_list[i])
+        grads_t = zip(t_change, self.var_list)
+        target_update = tf.train.GradientDescentOptimizer(1.0).apply_gradients(grads_t)
+        self.sess.run(target_update)

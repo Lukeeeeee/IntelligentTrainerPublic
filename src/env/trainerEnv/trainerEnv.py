@@ -3,13 +3,15 @@ from src.env.trainerEnv.baselineTrainerEnv import BaselineTrainerEnv
 from gym.spaces.box import Box
 import numpy as np
 from src.config.config import Config
-from config import CONFIG
-from config.key import CONFIG_KEY
+from conf import CONFIG
+from conf.key import CONFIG_KEY
 import tensorflow as tf
 from collections import deque
 from scipy.optimize import curve_fit
 from statsmodels.tsa.arima_model import AR
 import pandas as pd
+from src.env.util.trainerEnvStep import TrainerEnvStep
+import config as cfg
 
 
 def fit_loss(y_data):
@@ -46,55 +48,25 @@ class TrainerEnv(BaselineTrainerEnv):
         self.cyber_r_his = [-100.0, -100.0, -100.0]
         self.dyna_err_his = [-100.0, -100.0, -100.0]
         self.status = self.status_key['TRAIN']
+        self.stepper = TrainerEnvStep(config=None,
+                                      baseline_env_step_type=self.config.config_dict['BASELINE_ENV_STEP_TYPE'],
+                                      registred_type=self.config.config_dict['TRAINER_ENV_STEP_TYPE'],
+                                      reward_type=self.config.config_dict['REWARD_TYPE'])
 
     def step(self, action):
-        print("Trainer action=", action)
-        super().step(action=action)
-        ln = len(self.target_agent_real_env_reward_deque)
-        real_r_his = []
-        cyber_r_his = []
-        dyna_err_his = []
-        for i in range(self.td):
-            idx = ln - (self.td - i)
-            if idx < 0:
-                idx = 0
-            real_r_his.append(self.target_agent_real_env_reward_deque[idx])
-            cyber_r_his.append(self.target_agent_cyber_env_reward_deque[idx])
-            dyna_err_his.append(self.dyna_error_dequeu[idx])
-
-        self.real_r_his = self.real_r_his + real_r_his
-        self.cyber_r_his = cyber_r_his
-        self.dyna_err_his = dyna_err_his
-        obs = self._get_obs()
-        reward = self._get_reward(action)
-
-        done = False
-        info = [0.0]
-        print("Trainer reward=", reward)
-        self.log_file_content.append({
-            'INDEX': self.log_print_count,
-            'OBS': np.array(obs).squeeze().tolist(),
-            'REWARD': float(reward),
-            'DONE': done,
-            'ACTION': np.array(action).squeeze().tolist(),
-            'VALUE_FUNCTION_LOSS': self.critic_loss,
-            'CONTROLLER_LOSS': self.actor_loss,
-            'VALUE_FUNCTION_LOSS_CHANGE': self.critic_change,
-            'CONTROLLER_LOSS_CHANGE': self.actor_change
-        })
-        self.log_print_count += 1
-        return obs, reward, done, info
+        return self.stepper.step(env=self, action=action)
 
     def _get_reward(self, action):
 
         re = np.sign(self.real_r_his[-1] - self.real_r_his[-2])
 
-        print("re=", re)
         return re
 
     def _get_obs(self):
-
-        return self.real_r_his[-1]
+        if self.config.config_dict['TRAINER_ENV_STEP_TYPE'] == 'REWARD_DIFFER_REAL_CYBER_MEAN_REWARD_V3':
+            return 1 #[self.real_r_his[-1], self.cyber_r_his[-1]]
+        else:
+            return 1 #self.real_r_his[-1]  # re #re #self.target_agent._real_env_sample_count
 
     def reset(self):
         super().reset()

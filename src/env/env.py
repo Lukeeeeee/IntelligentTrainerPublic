@@ -1,6 +1,7 @@
 import gym
 from src.core import Basic
 from gym.core import Space
+from src.env.util.step import Step
 
 
 class BasicEnv(gym.Env, Basic):
@@ -12,9 +13,10 @@ class BasicEnv(gym.Env, Basic):
         self.observation_space = Space()
         self.cost_fn = None
         self.step_count = 0
+        self.stepper = Step(config=None)
 
     def step(self, action):
-        self.step_count += 1
+        return self.stepper.step(self, action)
 
     def reset(self):
         return None

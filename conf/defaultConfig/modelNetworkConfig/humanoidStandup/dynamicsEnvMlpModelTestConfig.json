@@ -1,0 +1,48 @@
+{
+    "ACTION_SPACE": [
+        17
+    ],
+    "BATCH_SIZE": 128,
+    "LEARNING_RATE": 0.001,
+    "LOG_FLAG": 1,
+    "NAME": "DynamicsEnvMlpModel",
+    "NET_CONFIG": [
+        {
+            "ACT": "LEAKY_RELU",
+            "B_INIT_VALUE": 0.0,
+            "NAME": "1",
+            "N_UNITS": 256,
+            "TYPE": "DENSE",
+            "W_NORMAL_STDDEV": 0.03
+        },
+        {
+            "ACT": "LEAKY_RELU",
+            "B_INIT_VALUE": 0.0,
+            "NAME": "2",
+            "N_UNITS": 600,
+            "TYPE": "DENSE",
+            "W_NORMAL_STDDEV": 0.03
+        },
+        {
+            "ACT": "LEAKY_RELU",
+            "B_INIT_VALUE": 0.0,
+            "NAME": "3",
+            "N_UNITS": 1200,
+            "TYPE": "DENSE",
+            "W_NORMAL_STDDEV": 0.03
+        },
+        {
+            "ACT": "IDENTITY",
+            "B_INIT_VALUE": 0.0,
+            "NAME": "OUPTUT",
+            "N_UNITS": 376,
+            "TYPE": "DENSE",
+            "W_NORMAL_STDDEV": 0.03
+        }
+    ],
+    "OUTPUT_HIGH": [],
+    "OUTPUT_LOW": [],
+    "STATE_SPACE": [
+        376
+    ]
+}

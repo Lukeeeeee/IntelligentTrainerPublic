@@ -50,10 +50,10 @@ class MemoryForDQN(Memory):
             self.rewards.append(reward)
             self.observations1.append(obs1)
             self.terminals1.append(terminal1)
-        print("Current DQN memory=")
-        for i in range(self.nb_entries):
-            print('Entry ', i, ' = ', self.observations0.get_batch(i), self.actions.get_batch(i),
-                  self.rewards.get_batch(i))
+        # print("Current DQN memory=")
+        # for i in range(self.nb_entries):
+        #     print('Entry ', i, ' = ', self.observations0.get_batch(i), self.actions.get_batch(i),
+        #           self.rewards.get_batch(i))
 
     ###sample the one with the best reward
     def sample(self, batch_size):

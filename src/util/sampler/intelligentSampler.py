@@ -1,8 +1,6 @@
-from src.core import Basic
 import numpy as np
 from src.config.config import Config
-from config.key import CONFIG_KEY
-import tensorflow as tf
+from conf.key import CONFIG_KEY
 from src.util.sampler.sampler import Sampler
 
 
@@ -11,7 +9,6 @@ class IntelligentSampler(Sampler):
 
     def __init__(self, cost_fn, config):
         super().__init__(cost_fn, config)
-
         self.F1 = 0.5
         self.F2 = 0.5
         self.count_new_real_samples = 0
@@ -27,12 +24,11 @@ class IntelligentSampler(Sampler):
             self.count_new_real_samples = sample_count
         return path
 
-    def reset(self, env, agent, reset_Noise=True):
-        state = super().reset(env=env, agent=agent, reset_Noise=reset_Noise)
-        sess = tf.get_default_session()
+    def reset(self, env, agent, reset_noise=True):
+        state = super().reset(env=env, agent=agent, reset_noise=reset_noise)
         vs_list = []
         if agent.sampler.env_status == agent.sampler.config.config_dict['TEST_ENVIRONMENT_STATUS']:
-            return env.reset()
+            return state
         print("Entered intel reset")
 
         if agent.env_status == agent.config.config_dict['REAL_ENVIRONMENT_STATUS']:
@@ -45,7 +41,7 @@ class IntelligentSampler(Sampler):
                 if len(vs_list) > 5 and (np.max(vs_list) - np.min(vs_list)) * 0.999 + np.min(vs_list) < vs_list[-1]:
                     break
         else:
-            if np.random.rand() < self.F1:
+            if np.random.rand() < self.F2:
                 idx = np.random.randint(agent.model.real_data_memory.observations0.length)
                 state = agent.model.real_data_memory.observations0.get_batch(idx)
                 env.set_state(state)

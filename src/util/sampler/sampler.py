@@ -1,7 +1,7 @@
 from src.core import Basic
-import numpy as np
-import easy_tf_log
 from src.config.config import Config
+import numpy as np
+import config as cfg
 
 
 class SamplerData(object):
@@ -68,7 +68,12 @@ class Sampler(Basic):
         sample_record = SamplerData()
         for i in range(sample_count):
             action = agent.predict(state=state)
-            new_state, re, done, _ = env.step(action)
+            if agent.ref_agent is not None and agent.status == agent.status_key['TRAIN'] and (
+                    'SAMPLER_PROB' not in cfg.config_dict or ('SAMPLER_PROB' in cfg.config_dict
+                                                              and np.random.rand() < cfg.config_dict['SAMPLER_PROB'])):
+                action = agent.ref_agent.predict(state=state, step_count=agent.get_trpo_step_count())
+
+            new_state, re, done, info = env.step(action)
             if not isinstance(done, bool):
                 if done[0] == 1:
                     done = True
@@ -81,8 +86,7 @@ class Sampler(Basic):
 
             from src.agent.targetAgent.targetAgent import TargetAgent
             if isinstance(agent, TargetAgent):
-                if agent.status == agent.status_key['TEST'] and \
-                        agent.env_status == agent.config.config_dict['REAL_ENVIRONMENT_STATUS']:
+                if agent.env_status == agent.config.config_dict['REAL_ENVIRONMENT_STATUS']:
                     pass
                 else:
                     re = reward
@@ -119,18 +123,17 @@ class Sampler(Basic):
                                        state_set=tmp_state_set,
                                        action_set=self.action_set,
                                        agent_print_log_flag=agent_print_log_flag)
-                state = self.reset(env, agent, reset_Noise=reset_Flag)
+                state = self.reset(env, agent, reset_noise=reset_Flag)
                 agent.log_queue.queue.clear()
             else:
                 state = new_state
 
         return sample_record
 
-    def reset(self, env, agent, reset_Noise=True):
+    def reset(self, env, agent, reset_noise=True):
         self.data.reset()
-        if reset_Noise == True:
+        if reset_noise is True:
             agent.reset()
-        # TODO WHEN DONE IS GOT, THE ENV WILL RESET  BY IT SELF?
         return env.reset()
 
     def train(self, *args, **kwargs):
@@ -140,84 +143,11 @@ class Sampler(Basic):
         pass
 
     def log_every_step(self, agent, reward, *arg, **kwargs):
-        if hasattr(agent, 'current_env_status'):
-            easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                  agent.current_status + '_ONE_STEP_REWARD',
-                              value=reward)
-
-        else:
-            easy_tf_log.tflog(key=agent.name + '_ONE_STEP_REWARD', value=reward)
-
         agent.log_queue.put({agent.name + '_SAMPLE_REWARD': reward})
 
     def log_every_episode(self, agent, average_reward, reward, state_set, action_set, agent_print_log_flag=False):
         if agent_print_log_flag is True:
             agent.print_log_queue(status=agent.status)
-        state_mean = np.mean(state_set, axis=0)
-        state_std = np.std(state_set, axis=0)
-        state_max = np.max(state_set, axis=0)
-        state_min = np.min(state_set, axis=0)
-
-        action_mean = np.mean(action_set, axis=0)
-        action_std = np.std(action_set, axis=0)
-        action_max = np.max(action_set, axis=0)
-        action_min = np.min(action_set, axis=0)
-
-        if hasattr(agent, 'current_env_status'):
-            easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                  agent.current_status + '_AVERAGE_HORIZON_REWARD',
-                              value=average_reward)
-            easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                  agent.current_status + '_SUM_HORIZON_REWARD',
-                              value=reward)
-
-            for i in range(len(state_mean)):
-                easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                      agent.current_status + '_SAMPLE_STATE_MEAN' + '_DIM_' + str(i) + '_',
-                                  value=state_mean[i])
-                easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                      agent.current_status + '_SAMPLE_STATE_STD' + '_DIM_' + str(i) + '_',
-                                  value=state_std[i])
-                easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                      agent.current_status + '_SAMPLE_STATE_MIN' + '_DIM_' + str(i) + '_',
-                                  value=state_min[i])
-                easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                      agent.current_status + '_SAMPLE_STATE_MAX' + '_DIM_' + str(i) + '_',
-                                  value=state_max[i])
-            for i in range(len(action_mean)):
-                easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                      agent.current_status + '_SAMPLE_ACTION_MEAN' + '_DIM_' + str(i) + '_',
-                                  value=action_mean[i])
-                easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                      agent.current_status + '_SAMPLE_ACTION_STD' + '_DIM_' + str(i) + '_',
-                                  value=action_std[i])
-                easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                      agent.current_status + '_SAMPLE_ACTION_MIN' + '_DIM_' + str(i) + '_',
-                                  value=action_min[i])
-                easy_tf_log.tflog(key=agent.name + '_' + agent.current_env_status + '_' +
-                                      agent.current_status + '_SAMPLE_ACTION_MAX' + '_DIM_' + str(i) + '_',
-                                  value=action_max[i])
-        else:
-            easy_tf_log.tflog(key=agent.name + '_AVERAGE_HORIZON_REWARD', value=average_reward)
-            easy_tf_log.tflog(key=agent.name + '_SUM_HORIZON_REWARD', value=reward)
-            for i in range(len(state_mean)):
-                easy_tf_log.tflog(key=agent.name + '_' + '_SAMPLE_STATE_MEAN' + '_DIM_' + str(i) + '_',
-                                  value=state_mean[i])
-                easy_tf_log.tflog(key=agent.name + '_' + '_SAMPLE_STATE_STD' + '_DIM_' + str(i) + '_',
-                                  value=state_std[i])
-                easy_tf_log.tflog(key=agent.name + '_' + '_SAMPLE_STATE_MIN' + '_DIM_' + str(i) + '_',
-                                  value=state_min[i])
-                easy_tf_log.tflog(key=agent.name + '_' + '_SAMPLE_STATE_MAX' + '_DIM_' + str(i) + '_',
-                                  value=state_max[i])
-            for i in range(len(action_mean)):
-                easy_tf_log.tflog(key=agent.name + '_' + '_SAMPLE_ACTION_MEAN' + '_DIM_' + str(i) + '_',
-                                  value=action_mean[i])
-                easy_tf_log.tflog(key=agent.name + '_' + '_SAMPLE_ACTION_STD' + '_DIM_' + str(i) + '_',
-                                  value=action_std[i])
-                easy_tf_log.tflog(key=agent.name + '_' + '_SAMPLE_ACTION_MIN' + '_DIM_' + str(i) + '_',
-                                  value=action_min[i])
-                easy_tf_log.tflog(key=agent.name + '_' + '_SAMPLE_ACTION_MAX' + '_DIM_' + str(i) + '_',
-                                  value=action_max[i])
 
     def set_F(self, F1, F2):
         self.F1 = F1
@@ -229,6 +159,7 @@ class Sampler(Basic):
 
     @env_status.setter
     def env_status(self, new):
+        assert isinstance(new, int)
         self._env_status = new
         if self._env_status == self.config.config_dict['REAL_ENVIRONMENT_STATUS']:
             self.data = self._real_data
@@ -236,6 +167,8 @@ class Sampler(Basic):
             self.data = self._cyber_data
         elif self._env_status == self.config.config_dict['TEST_ENVIRONMENT_STATUS']:
             self.data = self._test_data
+        else:
+            raise KeyError('Env status not existed!')
 
     @property
     def current_env_status(self):

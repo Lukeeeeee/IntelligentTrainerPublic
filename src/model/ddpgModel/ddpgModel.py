@@ -2,11 +2,12 @@ from baselines.ddpg.ddpg import DDPG as baseline_ddpg
 from src.model.ddpgModel.thirdPartCode.openAIBaselinesModel import Actor, Critic
 from baselines.ddpg.memory import Memory
 from baselines.ddpg.noise import *
-from config.key import CONFIG_KEY
+from conf.key import CONFIG_KEY
 from src.config.config import Config
 import tensorflow as tf
 from src.model.tensorflowBasedModel import TensorflowBasedModel
 import easy_tf_log
+import config as cfg
 
 
 class UONoise(object):
@@ -63,6 +64,9 @@ class DDPGModel(TensorflowBasedModel):
                 elif 'ou' in current_noise_type:
                     _, stddev = current_noise_type.split('_')
                     action_noise = UONoise()
+                    # action_noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(nb_actions),
+                    #                                             sigma=0.2 * np.ones(nb_actions))
+                    # action_noise = UONoise()
                 else:
                     raise RuntimeError('unknown noise type "{}"'.format(current_noise_type))
             self.action_noise = action_noise
@@ -154,9 +158,7 @@ class DDPGModel(TensorflowBasedModel):
         critic_loss, actor_loss = self.ddpg_model.train()
         self.ddpg_model.update_target_net()
         self.log_queue.put({self.name + '_ACTOR': actor_loss, self.name + '_CRITIC': critic_loss})
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_ACTOR_TRAIN_LOSS', value=actor_loss)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_CRITIC_TRAIN_LOSS', value=critic_loss)
-        self.compute_grad()
+
         return {
             'VALUE_FUNCTION_LOSS': critic_loss,
             'CONTROLLER_LOSS': actor_loss
@@ -203,11 +205,6 @@ class DDPGModel(TensorflowBasedModel):
         })
         actor_grads_norm = np.sqrt(np.sum(actor_grads ** 2))
         critic_grads_norm = np.sqrt(np.sum(actor_grads_norm ** 2))
-
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_ACTOR_GRADS_2_NORM',
-                          value=actor_grads_norm)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_CRITIC_GRADS_2_NORM',
-                          value=critic_grads_norm)
 
     def print_log_queue(self, status):
         self.status = status
@@ -265,9 +262,32 @@ class DDPGModel(TensorflowBasedModel):
                                reward=memory.rewards[i])
         return sample_data, enough_flag
 
+    def copy_model(self, new_model):
+        assert isinstance(new_model, type(self))
+        assert len(new_model.var_list) == len(self.var_list)
+        t_change = []
+        for new_var, old_var in zip(new_model.var_list, self.var_list):
+            t_change.append(-new_var + old_var)
+        grad_t = zip(t_change, self.var_list)
+        copy_rate = 1.0
+        if 'COPY_RATE' in cfg.config_dict:
+            copy_rate = cfg.config_dict['COPY_RATE']
+        target_update = tf.train.GradientDescentOptimizer(learning_rate=copy_rate).apply_gradients(grad_t)
+        sess = tf.get_default_session()
+        sess.run(target_update)
+
+    def enough_data(self, sample_count, env_status):
+        if env_status == self.config.config_dict['REAL_ENVIRONMENT_STATUS']:
+            memory = self.real_data_memory
+        elif env_status == self.config.config_dict['CYBER_ENVIRONMENT_STATUS']:
+            memory = self.simulation_data_memory
+        else:
+            raise ValueError('Wrong Environment status')
+        return memory.nb_entries >= sample_count
+
 
 if __name__ == '__main__':
-    from config import CONFIG
+    from conf import CONFIG
 
     con = Config(standard_key_list=DDPGModel.key_list)
     con.load_config(path=CONFIG + '/targetModelTestConfig.json')

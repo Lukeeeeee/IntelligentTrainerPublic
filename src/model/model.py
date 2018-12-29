@@ -1,5 +1,6 @@
 from src.core import Basic
 import tensorflow as tf
+from src.config.config import Config
 
 
 class Model(Basic):
@@ -7,6 +8,8 @@ class Model(Basic):
     def __init__(self, config, data=None):
         super(Model, self).__init__(config)
         self.config = config
+        if not self.config:
+            self.config = Config(standard_key_list=[], config_dict={})
         self.data = data
         self.input = None
         self.delta_state_output = None

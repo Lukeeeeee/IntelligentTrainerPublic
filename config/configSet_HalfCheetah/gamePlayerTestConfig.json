@@ -1,9 +1,0 @@
-{
-  "EPOCH": 1,
-  "GAME_NAME": "HalfCheetah",
-  "LOG_FLAG": 0,
-  "MAX_REAL_ENV_SAMPLE": 2000000,
-  "SAVE_CONFIG_FILE_FLAG": 1,
-  "SEED": 111,
-  "STEP": 30000000
-}

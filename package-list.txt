@@ -1,4 +1,4 @@
-name: intelligenttrainer
+name: py3.5
 channels: !!python/tuple
 - defaults
 dependencies:
@@ -17,6 +17,7 @@ dependencies:
   - absl-py==0.1.13
   - astor==0.6.2
   - atari-py==0.1.1
+  - baselines (/home/dls/CAP/baselines)==0.1.5
   - bleach==1.5.0
   - cffi==1.11.5
   - chardet==3.0.4
@@ -31,6 +32,7 @@ dependencies:
   - gast==0.2.0
   - glfw==1.6.0
   - grpcio==1.11.0
+  - gym (/home/dls/CAP/gym)==0.7.4
   - h5py==2.7.1
   - html5lib==0.9999999
   - idna==2.6
@@ -41,6 +43,7 @@ dependencies:
   - markdown==2.6.11
   - matplotlib==2.2.2
   - mpi4py==3.0.0
+  - mujoco-py==0.5.7
   - networkx==2.1
   - numpy==1.14.2
   - pandas==0.22.0
@@ -67,7 +70,7 @@ dependencies:
   - sklearn==0.0
   - statsmodels==0.8.0
   - tensorboard==1.7.0
-  - tensorflow==1.7.0
+  - tensorflow-gpu==1.7.0
   - tensorlayer==1.8.4
   - termcolor==1.1.0
   - tqdm==4.23.0

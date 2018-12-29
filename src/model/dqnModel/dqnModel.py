@@ -8,10 +8,10 @@ from src.model.tensorflowBasedModel import TensorflowBasedModel
 from src.model.utils.networkCreator import NetworkCreator
 from src.model.utils.memory_dqn import MemoryForDQN
 import tensorflow.contrib as tfcontrib
-from config.key import CONFIG_KEY
+from conf.key import CONFIG_KEY
 import easy_tf_log
 from src.model.ddpgModel.ddpgModel import UONoise
-
+import config as cfg
 
 class DQNModel(TensorflowBasedModel):
     key_list = Config.load_json(file_path=CONFIG_KEY + '/dqnModelKey.json')
@@ -21,13 +21,16 @@ class DQNModel(TensorflowBasedModel):
         self.proposed_action_list = []
         self.action_bound = action_bound
         action_list = []
+        split_count = 2
+        if 'SPLIT_COUNT' in cfg.config_dict:
+            split_count = cfg.config_dict['SPLIT_COUNT']
         for i in range(len(action_bound[0])):
             low = action_bound[0][i]
             high = action_bound[1][i]
             action_list.append(np.arange(start=low,
                                          stop=high + 0.01,
-                                         step=(high - low) / (self.config.config_dict['ACTION_SPLIT_COUNT'] - 1)))
-        self.action_step = (action_bound[1] - action_bound[0]) / (self.config.config_dict['ACTION_SPLIT_COUNT'] - 1)
+                                         step=(high - low) / (split_count - 1)))
+        self.action_step = (action_bound[1] - action_bound[0]) / (split_count - 1)
         self.action_iterator = np.asarray(list(itertools.product(*action_list)))
         print("self.action_iterator=", self.action_iterator, )
         # self.action_sample_list = []
@@ -69,6 +72,10 @@ class DQNModel(TensorflowBasedModel):
                                    observation_shape=self.config.config_dict['STATE_SPACE'],
                                    action_list=self.action_iterator)
 
+        # self.memory = Memory(limit=int(self.conf.config_dict['MEMORY_SIZE']),
+        #                            action_shape=self.conf.config_dict['ACTION_SPACE'],
+        #                            observation_shape=self.conf.config_dict['STATE_SPACE'])
+
         self.var_list = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self.config.config_dict['NAME'])
 
         self.variables_initializer = tf.variables_initializer(var_list=self.var_list)
@@ -78,7 +85,7 @@ class DQNModel(TensorflowBasedModel):
         average_loss = 0.0
         for i in range(self.config.config_dict['ITERATION_EVER_EPOCH']):
             #            print("memory length=", self.memory.)
-            if self.memory.observations0.length < self.config.config_dict['BATCH_SIZE']:
+            if self.memory.nb_entries < self.config.config_dict['BATCH_SIZE']:
                 return
             batch_data = self.memory.sample(batch_size=self.config.config_dict['BATCH_SIZE'])
             target_q_value_list = []
@@ -96,8 +103,6 @@ class DQNModel(TensorflowBasedModel):
             average_loss += re[0]
         average_loss /= self.config.config_dict['ITERATION_EVER_EPOCH']
         self.log_queue.put({self.name + '_LOSS': average_loss})
-        easy_tf_log.tflog(key=self.name + 'TRAIN_LOSS', value=average_loss)
-        # TODO POLICY FOR UPDATE DQN TARGET
         self.sess.run(self.update_target_q_op)
 
     def predict(self, sess, state):
@@ -114,8 +119,9 @@ class DQNModel(TensorflowBasedModel):
         super().init()
 
     def _predict_action(self, sess, state, q_value_tensor):
+        state = np.array(state)
         if len(state.shape) < 2:
-            state_m = state.reshape([1, -1])
+            state_m = state.reshape([-1, self.config.config_dict['STATE_SPACE'][0]])
         else:
             state_m = state
 
@@ -131,7 +137,7 @@ class DQNModel(TensorflowBasedModel):
             Qvalue = (res[0]).reshape([-1, ])
             Qrange = max(Qvalue) - min(Qvalue) + 1e-9
             Qvalue = 0.9 * (Qvalue - min(
-                Qvalue)) + 0.1 * np.random.rand() * Qrange
+                Qvalue)) + 0.1 * np.random.rand() * Qrange  ###added action noise, to break tie or select some actions that are near optimal.
             actions.append(self.action_iterator[np.argmax(Qvalue), :])
             q_value_max.append(np.max(Qvalue))
 
