@@ -70,44 +70,13 @@ Firstly activate the anaconda environment:
 source activate intelligenttrainer
 ```
 
-#### 1.2.1 Run the baseline experiments
-By run testBaseline.py, our code will run 10 times of experiments with same configuration
-but only different seed. (If you stopped the test before it fully finished, be sure to kill the process in your system.
+#### 1.2.1 Run the Single-Head Trainer experiments
+With branch "master", by running testIntelligent.py one can test the trainer framework with various single-head trainer implementations.  Inpendent experiments of multiple times with same configuration are uspported.
+ (If you stopped the test before it fully finished, be sure to kill the process in your system.
 If not, some errors within tensorflow and cuda may appear)
-```bash
-usage: testBaseline.py [-h] env
 
-positional arguments: 
-  env   Environment name, could be: Pendulum-v0, MountainCarContinuous-v0, Reacher-v1, HalfCheetah, Swimmer-v1
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-
-Examples:
-```bash
-cd path/to/intelligenttrainerpublic
-python test/testBaseline.py Pendulum-v0
-```
-
-#### 1.2.2 Run the intelligent trainer experiments
-By run testIntelligent.py, our code will run 10 times of experiments with same configuration
-but only different seed.
-```bash
-usage: testIntelligent.py [-h] env
-
-positional arguments: 
-  env   Environment name, could be: Pendulum-v0, MountainCarContinuous-v0, Reacher-v1, HalfCheetah, Swimmer-v1
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-
-Examples:
-```bash
-cd path/to/intelligenttrainerpublic
-python test/testIntelligent.py Pendulum-v0
-```
+#### 1.2.2 Run the ensemble trainer experiments
+With another branch "ensemble trainer", By running testRandomEnsemble.py, one can test the ensemble trainer.
 
 #### 1.2.3 Results and Visualize:
 
@@ -120,26 +89,17 @@ Every time you run test, the log file will be stored automatically in the `log/`
 For each directory, it stored in each test cases sub directory 
 and then named by the time you start to run the experiments.
 
-Like `/log/baselineTestLog/MountainCarContinuous-v0/2018-05-14_17-15-13` 
+Like `/log/baselineTestLog/MountainCarContinuous-v0/2018-05-14_17-15-13IDSTRING` 
 means a baseline trainer experiments running on environment `MountainCarContinuous-v0` 
-with time stamp `2018-05-14_17-15-13`
+with time stamp `2018-05-14_17-15-13` and speficication string `IDSTRING'
 
 For each sub directory, it was structured in this way:
 ```bash
 log/.../2018-05-14_17-15-13/config: the configuration file you used in this experiments.
 log/.../2018-05-14_17-15-13/loss: record all training process information, like loss, reward etc.
-log/.../2018-05-14_17-15-13/model: store all tensorflow model by the end of experiments.
-log/.../2018-05-14_17-15-13/tf: a tensorboard file that store some training information which can be used to monitor the experiments
 ```
 
-Also a json file will be stored in `log/logList`, which stores 10 directories of this test. Because we run 10 times of 
-experiments every time, this will help you to track the results.
-
-After finish one full test (10 experiments), a figure will be generated automatically, 
-which shows the Target Agent testing reward (mean reward among 10 experiments)
-
-In `test/visualize.py`, we implement some utilities to visualize the results, this is also we generate the figure we used in our paper.
-More documents about it will be done in the future.
+For visualization, please check plotter.py in src/util.
 
 
 ## 2. Design of codes
