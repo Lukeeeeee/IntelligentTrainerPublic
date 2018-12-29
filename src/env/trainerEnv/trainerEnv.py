@@ -11,7 +11,6 @@ from scipy.optimize import curve_fit
 from statsmodels.tsa.arima_model import AR
 import pandas as pd
 from src.env.util.trainerEnvStep import TrainerEnvStep
-import config as cfg
 
 
 def fit_loss(y_data):
@@ -64,9 +63,9 @@ class TrainerEnv(BaselineTrainerEnv):
 
     def _get_obs(self):
         if self.config.config_dict['TRAINER_ENV_STEP_TYPE'] == 'REWARD_DIFFER_REAL_CYBER_MEAN_REWARD_V3':
-            return 1 #[self.real_r_his[-1], self.cyber_r_his[-1]]
+            return 1.0*self.target_agent._real_env_sample_count / self.target_agent.config.config_dict['MAX_SAMPLE_COUNT']  #[self.real_r_his[-1], self.cyber_r_his[-1]]
         else:
-            return 1 #self.real_r_his[-1]  # re #re #self.target_agent._real_env_sample_count
+            return 1.0*self.target_agent._real_env_sample_count / self.target_agent.config.config_dict['MAX_SAMPLE_COUNT'] #self.real_r_his[-1]  # re #re #self.target_agent._real_env_sample_count
 
     def reset(self):
         super().reset()

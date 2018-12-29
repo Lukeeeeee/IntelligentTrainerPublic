@@ -17,22 +17,6 @@ import time
 import config as cfg
 
 
-class ThreadWithReturnValue(Thread):
-    def __init__(self, group=None, target=None, name=None,
-                 args=(), kwargs={}, Verbose=None):
-        Thread.__init__(self, group, target, name, args, kwargs)
-        self._return = None
-
-    def run(self):
-        print(type(self._target))
-        if self._target is not None:
-            self._return = self._target(*self._args,
-                                        **self._kwargs)
-
-    def join(self, *args):
-        Thread.join(self, *args)
-        return self._return
-
 
 class GamePlayer(Basic):
     key_list = Config.load_json(file_path=CONFIG_KEY + '/gamePlayerKey.json')
@@ -133,6 +117,7 @@ class GamePlayer(Basic):
                                         content=basic.log_file_content)
 
     def save_all_model(self):
+        return
         from src.model.tensorflowBasedModel import TensorflowBasedModel
         for basic in self.basic_list:
             if isinstance(basic, TensorflowBasedModel):
@@ -274,6 +259,8 @@ class RandomEnsemblePlayer(Basic):
         self._best_index = 1
         self.cumulative_target_agent_real_env_sample_count = 0
         self.pre_sample_list = None
+        self.step_count = 0
+        self.reference_samp = [cfg.config_dict['SAMPLER_PROB'], cfg.config_dict['SAMPLER_PROB']]
 
     @property
     def best_index(self):
@@ -301,7 +288,8 @@ class RandomEnsemblePlayer(Basic):
         for player in self.player_list:
             player.init()
 
-        self.best_index = 1
+        self.best_index = -1
+        cfg.config_dict['SAMPLER_PROB'] = 0.0
 
         for i in range(self.player_list[0].config.config_dict['EPOCH']):
             for j in range(self.player_list[0].config.config_dict['STEP']):
@@ -352,8 +340,8 @@ class RandomEnsemblePlayer(Basic):
         for i in range(self.player_count):
             sample = self.player_list[i].step(step_flag=False)
             sample_list.append(sample)
-        self.cumulative_target_agent_real_env_sample_count += self.player_list[
-                                                                  0].env.target_agent._real_env_sample_count - pre_target_agent_real_env_sample_count
+        self.cumulative_target_agent_real_env_sample_count += \
+            self.player_list[0].env.target_agent._real_env_sample_count - pre_target_agent_real_env_sample_count
 
         if not self.sample_list:
             self.sample_list = sample_list
@@ -362,16 +350,24 @@ class RandomEnsemblePlayer(Basic):
                 self.sample_list[i].union(sample_list[i])
 
         if cfg.config_dict['RANK_REWARD'] is True:
-            if self.cumulative_target_agent_real_env_sample_count > 30:
+            if self.cumulative_target_agent_real_env_sample_count > cfg.config_dict['RRThre']:
                 self.cumulative_target_agent_real_env_sample_count = 0
                 for player in self.player_list:
                     player.agent.remain_action_flag = False
                 rank_list = np.argsort([np.sum(self.sample_list[i].reward_set) for i in range(self.player_count)])
+                reward_factor = (cfg.config_dict['max_samP']-cfg.config_dict['SAMPLER_PROB'])/(cfg.config_dict['max_samP']-self.reference_samp[0])
+                reward_factor = reward_factor**2
+                if reward_factor <= cfg.config_dict['ZeroThre']:
+                    reward_factor = 0
                 for i in range(len(self.sample_list)):
-                    self.sample_list[rank_list[i]].reward_set[-1] = float(i)
+                    self.sample_list[rank_list[i]].reward_set[-1] = reward_factor*float(i)
+                    ####
+                    if np.isnan(self.sample_list[rank_list[i]].reward_set[-1]):
+                        print("Nan observed")
+
                     if self.pre_sample_list:
                         self.sample_list[i].action_set[-1][0:2] = self.pre_sample_list[i].action_set[-1][0:2]
-                    self.reward_his[rank_list[i]].append(float(i))
+                    self.reward_his[rank_list[i]].append(reward_factor*float(i))
 
                 for i in range(len(self.player_list)):
                     self.sample_list[i].state_set = self.sample_list[i].state_set[-1:]
@@ -386,12 +382,14 @@ class RandomEnsemblePlayer(Basic):
                                               except_list=())
                     self.pre_sample_list = dp(self.sample_list)
                 self.sample_list = None
+                self.step_count += 1
         else:
             for i in range(self.player_count):
-                self.reward_his[i].append(self.sample_list[i][0].reward_set[-1])
+                self.reward_his[i].append(self.sample_list[i].reward_set[-1])
             for i in range(self.player_count):
                 self._store_sample_except(sample=self.sample_list[i],
                                           except_list=())
+            self.step_count += 1
 
         NC = cfg.config_dict['NC']
         clearFlag = False
@@ -400,13 +398,28 @@ class RandomEnsemblePlayer(Basic):
             # every NC reward a test
             best_index, acc_reward = self._get_best_index_acc_reward()
             self.best_index = best_index
+            worst_reward = np.min(acc_reward)
+            if sum(acc_reward-worst_reward)==0:
+                advan_ratio = 0.5
+            else:
+                advan_ratio = (acc_reward[best_index]-worst_reward)/sum(acc_reward-worst_reward)
+            if "WorstRatio" in cfg.config_dict:
+                if cfg.config_dict["WorstRatio"]:
+                    median_reward = sum(acc_reward)-acc_reward[best_index]-worst_reward
+                    worst_ratio = (acc_reward[best_index]-worst_reward) / (acc_reward[best_index]-median_reward)
+                    if worst_ratio >= 4:
+                        for i in range(self.player_count):
+                            if acc_reward[i]==worst_reward:
+                                self.player_list[i].env.target_agent.model.copy_model(
+                                    self.player_list[best_index].env.target_agent.model)
+                                copy_event.append((best_index, i))
+                        print("Weigh copy finish, best player: %d" % best_index)
+                        clearFlag = True
 
-            advan_ratio = acc_reward[best_index] / sum(acc_reward)
-
-            cfg.config_dict['SAMPLER_PROB'] = (((advan_ratio - 0.5) / (cfg.config_dict['BestThre'] - 0.5)) **
+            self.reference_samp[1] = (((advan_ratio - 0.5) / (cfg.config_dict['BestThre'] - 0.5)) **
                                                cfg.config_dict['POW']) * cfg.config_dict['max_samP']
 
-            cfg.config_dict['SAMPLER_PROB'] = min(cfg.config_dict['SAMPLER_PROB'], cfg.config_dict['max_samP'])
+            self.reference_samp[1] = min(self.reference_samp[1], cfg.config_dict['max_samP'])
 
             # if advan_ratio >= cfg.config_dict['BestThre']:
             #     cfg.config_dict['COPY_PARTLY'] = True
@@ -424,8 +437,8 @@ class RandomEnsemblePlayer(Basic):
                                 self.player_list[best_index].env.target_agent.model)
                             copy_event.append((best_index, i))
                 print("Weigh copy finish, best player: %d" % best_index)
-
                 clearFlag = True
+
 
             for player in self.player_list:
                 player.log_file_content.append({
@@ -438,6 +451,17 @@ class RandomEnsemblePlayer(Basic):
                 player.log_file_count = player.log_print_count + 1
 
             self.log_print_count = self.log_print_count + 1
+
+        if self.cumulative_target_agent_real_env_sample_count / 3 < 10 and cfg.config_dict['RRThre']/3 < 30:
+            self.reference_samp[1] = 0
+            self.reference_samp[0] = 0
+        if self.step_count < 0:
+            cfg.config_dict['SAMPLER_PROB'] = 1.0
+        elif self.step_count % cfg.config_dict['SAMPLER_FRE'] == 0:
+            cfg.config_dict['SAMPLER_PROB'] = self.reference_samp[0]
+        else:
+            cfg.config_dict['SAMPLER_PROB'] = self.reference_samp[1]
+
 
         if clearFlag is True:
             # clear old sample reward
@@ -453,6 +477,8 @@ class RandomEnsemblePlayer(Basic):
 
         if 'STE_V3_TEST_MOVE_OUT' in cfg.config_dict and cfg.config_dict['STE_V3_TEST_MOVE_OUT'] is True:
             self.test()
+
+
 
     def test(self):
         for player in self.player_list:
@@ -494,7 +520,7 @@ class RandomEnsemblePlayer(Basic):
         return sum
 
     def _get_best_index_acc_reward(self):
-        self.cumulative_target_agent_real_env_sample_count = 0
+        # self.cumulative_target_agent_real_env_sample_count = 0
         assert int('DISCOUNT' in cfg.config_dict) + int('LINEAR_DISCOUNT' in cfg.config_dict) < 2
         if 'DISCOUNT' in cfg.config_dict:
             best_index = max(range(self.player_count), key=lambda k: self.discount_sum_reward(self.reward_his[k],
@@ -512,7 +538,7 @@ class RandomEnsemblePlayer(Basic):
             best_index = max(range(self.player_count), key=lambda k: sum(self.reward_his[k]))
             acc_reward = [sum(self.reward_his[k]) for k in range(self.player_count)]
         acc_reward = np.asarray(acc_reward)
-        acc_reward -= np.min(acc_reward)
+
         return best_index, acc_reward
 
 

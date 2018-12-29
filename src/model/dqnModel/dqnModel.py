@@ -10,7 +10,7 @@ from src.model.utils.memory_dqn import MemoryForDQN
 import tensorflow.contrib as tfcontrib
 from conf.key import CONFIG_KEY
 import easy_tf_log
-from src.model.ddpgModel.ddpgModel import UONoise
+# from src.model.ddpgModel.ddpgModel import UONoise
 import config as cfg
 
 class DQNModel(TensorflowBasedModel):
@@ -36,8 +36,8 @@ class DQNModel(TensorflowBasedModel):
         # self.action_sample_list = []
         # for sample in self.action_iterator:
         #     self.action_sample_list
-        self.noise = UONoise()
-        self.noise_scale = 0.1 * (action_bound[1][i] - action_bound[0][i])
+        # self.noise = UONoise()
+        # self.noise_scale = 0.1 * (action_bound[1][i] - action_bound[0][i])
         self.reward_input = tf.placeholder(shape=[None, 1], dtype=tf.float32)
 
         self.state_input = tf.placeholder(shape=[None] + list(self.config.config_dict['STATE_SPACE']), dtype=tf.float32)
