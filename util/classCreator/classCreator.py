@@ -6,7 +6,7 @@ import numpy as np
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(CURRENT_PATH)
 sys.path.append(CURRENT_PATH + '/../')
-from src.core import GamePlayer, AssembleGamePlayer
+from src.player import GamePlayer, AssembleGamePlayer
 from src.config.config import Config
 from src.model.ddpgModel.ddpgModel import DDPGModel
 from src.model.dqnModel.dqnModel import DQNModel
@@ -25,6 +25,8 @@ from src.util.sampler.sampler import Sampler
 from src.util.sampler.intelligentSampler import IntelligentSampler
 from src.util.sampler.fakeSampler import FakeSampler
 from src.util.sampler.fakeIntelligentSampler import FakeIntelligentSampler
+from src.player import RandomEnsemblePlayer
+from src.model.model import Model
 
 
 def create_trpo(config_path, action_bound, obs_bound, update_dict):
@@ -71,13 +73,13 @@ def create_reinforce_model(config_path, action_bound, update_dict):
     return reinforce_model
 
 
-def create_dynamics_env(config_path, dyna_model, sess, real_env, cost_fn, done_fn, update_dict):
+def create_dynamics_env(config_path, dyna_model, sess, real_env, cost_fn, done_fn, reset_fn, update_dict):
     dynamics_env_conf = load_config(key_list=DynamicsEnv.key_list,
                                     config_path=config_path,
                                     update_dict=update_dict)
 
     dyna_env = DynamicsEnv(config=dynamics_env_conf, sess=sess, model=dyna_model, init_env=real_env,
-                           cost=cost_fn, done=done_fn)
+                           cost=cost_fn, done=done_fn, reset=reset_fn)
     return dyna_env
 
 
@@ -145,7 +147,7 @@ def create_intelligent_random_trainer_agent(config_path, update_dict, env):
                                         config_path=config_path,
                                         update_dict=update_dict)
     trainer_agent = IntelligentRandomTrainerAgent(config=random_trainer_config,
-                                                  model=None,
+                                                  model=Model(config=None),
                                                   env=env)
     return trainer_agent
 
@@ -176,23 +178,30 @@ def create_fake_intelligent_sampler(config_path, update_dict, cost_fn, env):
     return sampler
 
 
-def create_game_player(config_path, update_dict, env, agent, experiment_type, basic_list, refer_player=None, name=''):
+def create_game_player(config_path, update_dict, env, agent, experiment_type, basic_list, refer_player=None, name='',
+                       log_path_end=''):
     player_config = load_config(key_list=GamePlayer.key_list,
                                 config_path=config_path,
                                 update_dict=update_dict)
     if refer_player:
 
         player = GamePlayer(config=player_config, env=env, agent=agent, basic_list=basic_list,
-                            ep_type=experiment_type, log_path=refer_player.logger.log_dir + name)
+                            ep_type=experiment_type, log_path=refer_player.logger.log_dir + name,
+                            log_path_end_with=log_path_end)
     else:
         player = GamePlayer(config=player_config, env=env, agent=agent, basic_list=basic_list,
-                            ep_type=experiment_type)
+                            ep_type=experiment_type, log_path_end_with=log_path_end)
     return player
 
 
 def create_assemble_player(main_player, ref_player_list):
     assemble_player = AssembleGamePlayer(intel_player=main_player, ref_player_list=ref_player_list)
     return assemble_player
+
+
+def create_random_ensemble_player(player_list, intel_index, fakeSamplers):
+    p = RandomEnsemblePlayer(player_list=player_list, intel_trainer_index=intel_index, fakeSamplers = fakeSamplers)
+    return p
 
 
 def update_config_dict(config, dict):

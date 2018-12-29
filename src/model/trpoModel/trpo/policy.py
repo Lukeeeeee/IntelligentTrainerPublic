@@ -5,7 +5,7 @@ Written by Patrick Coady (pat-coady.github.io)
 """
 import numpy as np
 import tensorflow as tf
-
+import config as cfg
 
 class Policy(object):
     """ NN-based policy approximation """
@@ -52,6 +52,21 @@ class Policy(object):
             if self.name_scope in var.name:
                 self.var_list.append(var)
         self.init_op = tf.variables_initializer(var_list=self.var_list)
+
+    def copy_weight(self, new_policy):
+        assert len(new_policy.var_list) == len(self.var_list)
+        t_change = []
+        for i in range(len(new_policy.var_list)):
+            t_change.append(-new_policy.var_list[i] + self.var_list[i])
+        grads_t = zip(t_change, self.var_list)
+        copy_rate = 1.0
+        if 'COPY_RATE' in cfg.config_dict:
+            copy_rate = cfg.config_dict['COPY_RATE']
+        target_update = tf.train.GradientDescentOptimizer(copy_rate).apply_gradients(grads_t)
+        self.sess.run(target_update)
+        self.beta = new_policy.beta
+        self.lr_multiplier = new_policy.lr_multiplier
+        pass
 
     def _placeholders(self):
         """ Input placeholders"""

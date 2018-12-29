@@ -1,9 +1,0 @@
-{
-  "EPOCH": 1,
-  "GAME_NAME": "Reacher-v1",
-  "LOG_FLAG": 0,
-  "MAX_REAL_ENV_SAMPLE": 2500000,
-  "SAVE_CONFIG_FILE_FLAG": 1,
-  "SEED": 3232,
-  "STEP": 30000000
-}

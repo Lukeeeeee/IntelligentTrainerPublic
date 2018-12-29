@@ -1,0 +1,40 @@
+{
+    "ACTION_SPACE": [
+        3
+    ],
+    "ACTION_SPLIT_COUNT": 2,
+    "DISCOUNT": 0.99,
+    "ITERATION_EVER_EPOCH": 4,
+    "LEARNING_RATE": 0.1,
+    "LOG_FLAG": 1,
+    "NAME": "TrainerREINFORCE",
+    "NET_CONFIG": [
+        {
+            "ACT": "RELU",
+            "B_INIT_VALUE": 0.0,
+            "NAME": "1",
+            "N_UNITS": 24,
+            "TYPE": "DENSE",
+            "W_NORMAL_STDDEV": 0.001
+        },
+        {
+            "ACT": "RELU",
+            "B_INIT_VALUE": 0.0,
+            "NAME": "2",
+            "N_UNITS": 24,
+            "TYPE": "DENSE",
+            "W_NORMAL_STDDEV": 0.001
+        },
+        {
+            "ACT": "SOFTMAX",
+            "B_INIT_VALUE": 0.0,
+            "NAME": "OUPTUT",
+            "N_UNITS": 1,
+            "TYPE": "DENSE",
+            "W_NORMAL_STDDEV": 0.001
+        }
+    ],
+    "STATE_SPACE": [
+      1
+    ]
+}

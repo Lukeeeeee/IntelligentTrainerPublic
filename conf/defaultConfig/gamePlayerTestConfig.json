@@ -1,0 +1,9 @@
+{
+    "EPOCH": 1,
+    "GAME_NAME": "TEST",
+    "LOG_FLAG": 0,
+    "MAX_REAL_ENV_SAMPLE": 5000,
+    "SAVE_CONFIG_FILE_FLAG": 1,
+    "SEED": 45345,
+    "STEP": 3000000
+}

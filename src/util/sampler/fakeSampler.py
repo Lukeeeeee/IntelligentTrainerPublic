@@ -1,7 +1,8 @@
 from src.core import Basic
 import numpy as np
+from src.model.simpleMlpModel.simpleMlpModel import SimpleMlpModel
 from src.config.config import Config
-from config.key import CONFIG_KEY
+from conf.key import CONFIG_KEY
 import tensorflow as tf
 from src.util.sampler.sampler import Sampler
 from src.util.sampler.sampler import SamplerData
@@ -48,12 +49,11 @@ class FakeSampler(Sampler):
                     reward = re
                 from src.agent.targetAgent.targetAgent import TargetAgent
                 if isinstance(agent, TargetAgent):
-                    if agent.status == agent.status_key['TEST'] and \
-                            agent.env_status == agent.config.config_dict['REAL_ENVIRONMENT_STATUS']:
+                    if agent.env_status == agent.config.config_dict['REAL_ENVIRONMENT_STATUS']:
                         pass
                     else:
                         re = reward
-
+                re = float(re)
                 self.step_count_per_episode += 1
                 agent.env_sample_count += 1
                 if store_flag is True:
