@@ -76,7 +76,7 @@ With branch "master", by running testIntelligent.py one can test the trainer fra
 If not, some errors within tensorflow and cuda may appear)
 
 #### 1.2.2 Run the ensemble trainer experiments
-With another branch "ensemble trainer", By running testRandomEnsemble.py, one can test the ensemble trainer.
+With another branch "EnsembleTrainer", By running testRandomEnsemble.py, one can test the ensemble trainer.
 
 #### 1.2.3 Results and Visualize:
 
