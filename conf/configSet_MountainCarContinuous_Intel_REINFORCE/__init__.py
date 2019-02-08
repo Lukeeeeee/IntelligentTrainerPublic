@@ -1,0 +1,5 @@
+import os
+from conf.configSet_MountainCarContinuous_Intel_REINFORCE.modelNetworkConfig import \
+    MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_INTEL_REINFORCE
+
+CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_INTEL_REINFORCE = os.path.dirname(os.path.realpath(__file__))

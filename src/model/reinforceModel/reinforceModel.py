@@ -1,4 +1,4 @@
-from config.key import CONFIG_KEY
+from conf.key import CONFIG_KEY
 from src.config.config import Config
 import tensorflow as tf
 from src.model.tensorflowBasedModel import TensorflowBasedModel
@@ -83,7 +83,7 @@ class REINFORCEModel(TensorflowBasedModel):
             average_loss += np.sum(re)
         average_loss /= self.config.config_dict['ITERATION_EVER_EPOCH']
         self.log_queue.put({self.name + '_LOSS': average_loss})
-        easy_tf_log.tflog(key=self.name + 'TRAIN_LOSS', value=average_loss)
+        # easy_tf_log.tflog(key=self.name + 'TRAIN_LOSS', value=average_loss)
         self.state_set, self.action_set, self.reward_set = [], [], []
         self.print_log_queue(status=self.status_key['TRAIN'])
 

@@ -12,6 +12,8 @@ class Agent(Basic):
         self.model = model
         self._env_step_count = 0
         self.sampler = sampler
+        self.assigned_action = None
+        self.ref_agent = None
 
     @property
     def env_sample_count(self):
@@ -19,6 +21,7 @@ class Agent(Basic):
 
     @env_sample_count.setter
     def env_sample_count(self, new_value):
+        assert isinstance(new_value, int) and new_value >= 0
         self._env_step_count = new_value
 
     @property
@@ -27,16 +30,19 @@ class Agent(Basic):
 
     @status.setter
     def status(self, new_value):
-        if new_value != Basic.status_key['TRAIN'] and new_value != Basic.status_key['TEST']:
-            raise KeyError('New Status: %d did not existed' % new_value)
+        assert (new_value == Basic.status_key['TRAIN'] or new_value == Basic.status_key['TEST'])
 
-        if self._status == new_value:
-            return
         self._status = new_value
         self.model.status = new_value
 
     def predict(self, state, *arg, **kwargs):
-        return self.model.predict(state)
+        if self.assigned_action is not None:
+            ac = self.assigned_action
+            self.assigned_action = None
+            # NOTE ONLY FOR RANDOM ASSEMBLE EXP
+            return ac
+        else:
+            return self.model.predict(state)
 
     def sample(self, env, sample_count, store_flag=False, agent_print_log_flag=False, reset_Flag=True):
 
@@ -56,7 +62,7 @@ class Agent(Basic):
         reward_list = np.array(reward_list)
         sum = np.sum(reward_list)
         mean = np.mean(reward_list)
-        std = np.mean(reward_list)
+        std = np.std(reward_list)
         print("%s Reward: Sum: %f Average %f Std %f" %
               (self.name, sum, mean, std))
         self.log_file_content.append({'INDEX': self.log_print_count,

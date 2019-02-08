@@ -62,3 +62,16 @@ class NetworkCreator(object):
 
             # TODO ADD MORE SUPPORT FOR DIFFERENT LAYER
         return net, net.outputs, net.all_params
+
+    # @staticmethod
+    # def create_norm_network(input, input_norm, output_norm, network_config, net_name=None):
+    #     net = tl.layers.InputLayer(inputs=input,
+    #                                name=net_name + '_INPUT')
+    #     for layer_config in network_config:
+    #         if layer_config['TYPE'] == 'DENSE':
+    #             net = tl.layers.DenseLayer(prev_layer=net,
+    #                                        n_units=layer_config['N_UNITS'],
+    #                                        act=NetworkCreator.act_dict[layer_config['ACT']],
+    #                                        name=layer_config['NAME'])
+    #         # TODO ADD MORE SUPPORT FOR DIFFERENT LAYER
+    #     return net, net.outputs, net.all_params

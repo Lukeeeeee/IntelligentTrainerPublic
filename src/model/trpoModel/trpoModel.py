@@ -5,11 +5,11 @@ from src.model.trpoModel.trpo.value_function import NNValueFunction
 from src.model.trpoModel.trpo.utils import Logger, Scaler
 import src.model.trpoModel.trpo.train as trpo_main
 from src.model.tensorflowBasedModel import TensorflowBasedModel
-import easy_tf_log
 from collections import deque
 from src.config.config import Config
-from config.key import CONFIG_KEY
+from conf.key import CONFIG_KEY
 from baselines.ddpg.memory import Memory
+import config as cfg
 
 
 class TrpoModel(TensorflowBasedModel):
@@ -47,7 +47,7 @@ class TrpoModel(TensorflowBasedModel):
         self._cyber_step_count = 0.0
         self.action_low = action_bound[0]
         self.action_high = action_bound[1]
-        self._env_status = None
+        self._env_status = self.config.config_dict['REAL_ENVIRONMENT_STATUS']
 
         self.real_data_memory = Memory(limit=10000,
                                        action_shape=self.config.config_dict['ACTION_SPACE'],
@@ -62,6 +62,8 @@ class TrpoModel(TensorflowBasedModel):
 
     @env_status.setter
     def env_status(self, new):
+        assert (new == self.config.config_dict['REAL_ENVIRONMENT_STATUS'] or new == self.config.config_dict[
+            'CYBER_ENVIRONMENT_STATUS'])
         self._env_status = new
         # TODO change
         if new == self.config.config_dict['REAL_ENVIRONMENT_STATUS']:
@@ -113,6 +115,8 @@ class TrpoModel(TensorflowBasedModel):
             return self._real_step_count
         elif self._env_status == self.config.config_dict['CYBER_ENVIRONMENT_STATUS']:
             return self._cyber_step_count
+        else:
+            raise KeyError('Environment status did not existed')
 
     @step_count.setter
     def step_count(self, new_val):
@@ -120,9 +124,18 @@ class TrpoModel(TensorflowBasedModel):
             self._real_step_count = new_val
         elif self._env_status == self.config.config_dict['CYBER_ENVIRONMENT_STATUS']:
             self._cyber_step_count = new_val
+        else:
+            raise KeyError('Environment status did not existed')
+
+    def copy_model(self, new_model):
+        assert isinstance(new_model, type(self))
+        self.policy.copy_weight(new_model.policy)
+        self.val_func.copy_weight(new_model.val_func)
+        from copy import deepcopy
+        self.scaler = deepcopy(new_model.scaler)
 
     def update(self):
-        # self._save_trajectories_to_memory(reset_step_count=False)
+
         observes, actions, advantages, disc_sum_rew = self._return_train_data()
         # TODO FIX LOGGER AND UODATE LOG DATA
         loss, entropy, kl, beta, lr_multiplier = self.policy.update(observes=observes,
@@ -141,26 +154,26 @@ class TrpoModel(TensorflowBasedModel):
             self.name + '_LR_MULTIPLIER': lr_multiplier,
             self.name + '_VAL_FUNCTION_LOSS': loss_val,
             self.name + '_EXP_VAR': exp_var,
-            self.name + '_OLD_EXP_VAR': old_exp_var
+            self.name + '_OLD_EXP_VAR': old_exp_var,
+            self.name + '_ENV_STATUS': self.current_env_status,
+            self.name + '_TRAIN_SAMPLE_COUNT': len(observes)
         }
         self.log_queue.put(res_dict)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_POLICY_LOSS', value=loss)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_ENTROPY', value=entropy)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_KL', value=kl)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_BETA', value=beta)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_LR_MULTIPLIER', value=lr_multiplier)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_VAL_FUNCTION_LOSS', value=loss_val)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_EXP_VAR', value=exp_var)
-        easy_tf_log.tflog(key=self.name + '_' + self.current_env_status + '_OLD_EXP_VAR', value=old_exp_var)
+
         return {
             'VALUE_FUNCTION_LOSS': loss_val,
             'CONTROLLER_LOSS': loss
         }
 
-    def predict(self, obs):
+    def predict(self, obs, step_count=None):
         obs = np.reshape(obs, [1, -1])
-        obs = np.append(obs, [[self.step_count * self.config.config_dict['INCREMENT_ENV_STEP']]],
-                        axis=1)
+
+        if step_count is not None:
+            obs = np.append(obs, [[step_count * self.config.config_dict['INCREMENT_ENV_STEP']]],
+                            axis=1)
+        else:
+            obs = np.append(obs, [[self.step_count * self.config.config_dict['INCREMENT_ENV_STEP']]],
+                            axis=1)
         scale, offset = self.scaler.get()
         scale[-1] = 1.0  # don't scale time step feature
         offset[-1] = 0.0  # don't offset time step feature
@@ -240,11 +253,12 @@ class TrpoModel(TensorflowBasedModel):
                           gamma=self.config.config_dict['GAMMA'],
                           lam=self.config.config_dict['LAM'])
         observes, actions, advantages, disc_sum_rew = trpo_main.build_train_set(trajectories=trajectories)
-        self.trajectories_memory.clear()
-
-        return observes[-self.config.config_dict['BATCH_SIZE']:], actions[-self.config.config_dict['BATCH_SIZE']:], \
-               advantages[-self.config.config_dict['BATCH_SIZE']:], disc_sum_rew[
-                                                                    -self.config.config_dict['BATCH_SIZE']:]
+        # NO MORE CLEAR OF MEMORY
+        if 'NOT_TRPO_CLEAR_MEMORY' in cfg.config_dict and cfg.config_dict['NOT_TRPO_CLEAR_MEMORY'] is True:
+            pass
+        else:
+            self.trajectories_memory.clear()
+        return observes, actions, advantages, disc_sum_rew
 
     def _save_trajectories_to_memory(self, reset_step_count=True):
         if len(self.trajectories['observes']) > 0:
@@ -287,6 +301,17 @@ class TrpoModel(TensorflowBasedModel):
                                reward=memory.rewards[i])
         return sample_data, enough_flag
 
+    def enough_data(self, sample_count, env_status):
+        if env_status == self.config.config_dict['REAL_ENVIRONMENT_STATUS']:
+            memory = self.real_data_memory
+        elif env_status == self.config.config_dict['CYBER_ENVIRONMENT_STATUS']:
+            memory = self.simulation_data_memory
+        else:
+            raise ValueError('Wrong Environment status')
+
+        length = memory.nb_entries
+        return length >= sample_count
+
 
 if __name__ == '__main__':
 
@@ -294,7 +319,7 @@ if __name__ == '__main__':
 
     con = Config(standard_key_list=TrpoModel.key_list)
     con.load_config(
-        path='/home/dls/CAP/intelligenttrainerframework/config/modelNetworkConfig/targetModelTestConfig.json')
+        path='/home/dls/CAP/intelligenttrainerframework/conf/modelNetworkConfig/targetModelTestConfig.json')
     a = TrpoModel(config=con, action_bound=([-1], [1]), obs_bound=([-1], [1]))
     import tensorflow as tf
     import os
