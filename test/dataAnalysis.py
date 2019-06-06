@@ -74,39 +74,9 @@ def print_best_eps_reward(file_path, eps_size):
           (min_reward, real_sample_used_list[pos], cyber_sample_used_list[pos], max_real_sample))
 
 
-def get_sample_count_with_specific_reward(game_dict, game_name, reward_thershold):
-    from src.util.plotter import Plotter
-    from src.config.config import Config
-    from log.logList import LOG_LIST
-    key_select_list = ['baseline', 'intel v2 new step']
-    all_path_list = []
-    all_name = []
-    for name, path in game_dict.items():
-        if key_select_list is None or name in key_select_list:
-            all_path_list.append(path)
-            all_name.append(name)
-            print(path, name)
-    res_dict = {}
-    res_dict['reward_value'] = reward_thershold
-    res_dict['game_name'] = game_name
-    for log_list, name in zip(all_path_list, all_name):
-        reward_list, used_sample, _ = Plotter.compute_mean_multi_reward(file_list=Config.load_json(log_list))
-        min_used_sample = 1000000000000
-        min_reward = -100000000
-        for reward, index in zip(reward_list, used_sample):
-            if reward >= reward_thershold and index < min_used_sample:
-                min_used_sample = index
-                min_reward = reward
-        res_dict[name + '_used_sample_count'] = min_used_sample
-        res_dict[name + '_first_reward'] = min_reward
-    with open("/home/dls/CAP/intelligenttrainerframework/log/rewardSampleUsed/" + game_name + '.json', 'w') as f:
-        json.dump(res_dict, fp=f, indent=4)
-
-
 def compute_mean_std_one_exp_and_save(path_list_file, save_dir=None, save_name=None):
-    from log.expResult import EXP_RES
     if not save_dir:
-        save_dir = EXP_RES
+        raise ValueError("Log dir can not be None!")
     if not save_name:
         save_name = os.path.basename(path_list_file)
     mean, index, std = Plotter.compute_mean_multi_reward(file_list=Config.load_json(file_path=path_list_file),
@@ -136,10 +106,3 @@ def compute_one_exp(path_list_file):
         print("file not found for %s" % {path_list_file})
 
 
-if __name__ == '__main__':
-    # compute_mean_std_one_exp_and_save(
-    #     path_list_file='/home/dls/CAP/intelligenttrainerframework/log/logList/halfCheetah_baseline_v5base_v5_no_dyna_stepcount=3000.json')
-    from test.resDictList import *
-
-    # compute_all_res(mountain_car_continuous_dict)
-    compute_one_exp(swimmer_dict['intel_v5_action_split_5'])
