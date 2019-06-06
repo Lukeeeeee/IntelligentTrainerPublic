@@ -25,7 +25,7 @@ def run_multiple_experiments(game_env_name, cuda_device, player_config_path_list
     cfg.config_dict = {
         'NOT_TRPO_CLEAR_MEMORY': False,
         'STE_V3_TEST_MOVE_OUT': True,
-        'NC': 5,
+        'NC': 3,   ###100 for Mcar
         # 'DISCOUNT': 0.99,
         'SAMPLER_PROB': 0.0,
         'LINEAR_DISCOUNT': 0.7,
@@ -34,17 +34,19 @@ def run_multiple_experiments(game_env_name, cuda_device, player_config_path_list
         'F1=0': False,
         'F2=0': False,
         "TIME_SEED": True,
-        'BestThre': 0.8,  #####minimum 0.5
+        'BestThre': 0.5,  #####minimum 0.5
         'max_samP': 1.0,
         'MAX_RE_LEN': 30,
-        'POW': 2,
+        'POW': 1,
         'SPLIT_COUNT': 2,
         'COPY_RATE': 1.0,
         'RANK_REWARD': True,
-        'RRThre': 10,
+        'RRThre': 0,
         'WorstRatio': False,
         'SAMPLER_FRE': 3,
-        'ZeroThre': 0.95,
+        'ZeroThre': 0.0,
+        'phiRange': 0.2,
+        'Sig_PREF': False
     }
 
     assert int('DISCOUNT' in cfg.config_dict) + int('LINEAR_DISCOUNT' in cfg.config_dict) < 2
@@ -132,7 +134,7 @@ if __name__ == '__main__':
                             player_target_model_type_list=(('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
                             num=1,
                             seed=None,
-                            exp_end_with='EnsX4EFinal_FC_BT0.8')
+                            exp_end_with='EnsFinalX')
                             #exp_end_with='debug')
 
     # run_multiple_experiments(game_env_name='Reacher-v1',
@@ -147,7 +149,7 @@ if __name__ == '__main__':
     #                           player_target_model_type_list=(('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
     #                           num=1,
     #                           seed=None,
-    #                           exp_end_with='EnsX4EFinal_FC_BT0.9')
+    #                           exp_end_with='EnsFinalX')
     #                           # exp_end_with='debug')
     # #
     # run_multiple_experiments(game_env_name='Pendulum-v0',
@@ -162,7 +164,7 @@ if __name__ == '__main__':
     #                          player_target_model_type_list=(('DQN', 'DDPG'), ('FIX', 'DDPG'), ('RANDOM', 'DDPG')),
     #                          num=1,
     #                          seed=None,
-    #                          exp_end_with='EnsX4EFinal_FC_BT0.9')
+    #                          exp_end_with='EnsFinalX')
     #                          # exp_end_with='debug')
     # # #
     # run_multiple_experiments(game_env_name='MountainCarContinuous-v0',
@@ -178,7 +180,7 @@ if __name__ == '__main__':
     #                          player_target_model_type_list=(('DQN', 'DDPG'), ('FIX', 'DDPG'), ('RANDOM', 'DDPG')),
     #                          num=1,
     #                          seed=None,
-    #                          exp_end_with='EnsX4EFinal_FC_BT0.9')
+    #                          exp_end_with='EnsFinalX')
     #                          # exp_end_with='debug')
     #
     # run_multiple_experiments(game_env_name='HalfCheetah',
@@ -192,5 +194,5 @@ if __name__ == '__main__':
     #                               MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL)),
     #                          player_target_model_type_list=(('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
     #                          num=1,
-    #                          exp_end_with='EnsX4EFinal_FC_BT0.9')
+    #                          exp_end_with='EnsFinalX')
     #                          # exp_end_with='debug')

@@ -30,7 +30,7 @@ class IntelligentRandomTrainerAgent(Agent):
                 res[i] = 0.2
         self.sample_count += 1
         # res = [0.5, 0.9, 0.1]
-        return np.array(res)
+        return np.array(res)*1.0
 
     def update(self):
         # TODO finish your own update by using API with self.model

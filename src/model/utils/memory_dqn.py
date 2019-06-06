@@ -13,47 +13,50 @@ def array_min2d(x):
 class MemoryForDQN(Memory):
     def __init__(self, limit, action_shape, observation_shape, action_list):
         super().__init__(limit, action_shape, observation_shape)
-        self.action_list = action_list
+        self.action_list = []
+        for i in range(len(action_list)):
+            self.action_list.append(copy.deepcopy(action_list[i]))
+        # self.action_list.append([0.0, 0.0, 1.0]) ####add the action used by no cyber
         self.max_count_per_action = max(1, int(limit / len(action_list)))  ###newly modified
 
     def append(self, obs0, action, reward, obs1, terminal1, training=True):
         if not training:
             return
-        # ###examine if the action belongs to action_list
-        # inlist = False
-        # for i in range(len(self.action_list)):
-        #     if np.mean((action - self.action_list[i]) ** 2) < 0.01:
-        #         inlist = True
-        #         break
-        # idx_set = []
-        # if inlist == True:
-        #     update_action = self.action_list[i]
-        #     for idx in range(self.actions.length):
-        #         if np.mean((self.actions.__getitem__(idx) - update_action) ** 2) < 0.01:
-        #             idx_set.append(idx)
-        # if inlist == True and len(idx_set) > self.max_count_per_action:
-        #     ###count number of samples of
-        #     idx = idx_set[np.random.randint(len(idx_set))]
-        #
-        #     start = self.observations0.start
-        #     maxlen = self.observations0.maxlen
-        #
-        #     self.observations0.data[(start + idx) % maxlen] = obs0
-        #     self.actions.data[(start + idx) % maxlen] = action
-        #     self.rewards.data[(start + idx) % maxlen] = reward
-        #     self.observations1.data[(start + idx) % maxlen] = obs1
-        #     self.terminals1.data[(start + idx) % maxlen] = terminal1
-        #
-        # else:
-        self.observations0.append(obs0)
-        self.actions.append(action)
-        self.rewards.append(reward)
-        self.observations1.append(obs1)
-        self.terminals1.append(terminal1)
-        # print("Current DQN memory=")
-        # for i in range(self.nb_entries):
-        #     print('Entry ', i, ' = ', self.observations0.get_batch(i), self.actions.get_batch(i),
-        #           self.rewards.get_batch(i))
+        ###examine if the action belongs to action_list
+        inlist = False
+        for i in range(len(self.action_list)):
+            if np.mean((action - self.action_list[i]) ** 2) < 0.04:
+                inlist = True
+                break
+        idx_set = []
+        if inlist == True:
+            update_action = self.action_list[i]
+            for idx in range(self.actions.length):
+                if np.mean((self.actions.__getitem__(idx) - update_action) ** 2) < 0.04:
+                    idx_set.append(idx)
+        if inlist == True and len(idx_set) > self.max_count_per_action:
+            ###count number of samples of
+            idx = idx_set[np.random.randint(len(idx_set))]
+
+            start = self.observations0.start
+            maxlen = self.observations0.maxlen
+
+            self.observations0.data[(start + idx) % maxlen] = obs0
+            self.actions.data[(start + idx) % maxlen] = action
+            self.rewards.data[(start + idx) % maxlen] = reward
+            self.observations1.data[(start + idx) % maxlen] = obs1
+            self.terminals1.data[(start + idx) % maxlen] = terminal1
+
+        else:
+            self.observations0.append(obs0)
+            self.actions.append(action)
+            self.rewards.append(reward)
+            self.observations1.append(obs1)
+            self.terminals1.append(terminal1)
+        print("Current DQN memory=")
+        for i in range(self.nb_entries):
+            print('Entry ', i, ' = ', self.observations0.get_batch(i), self.actions.get_batch(i),
+                  self.rewards.get_batch(i))
 
     ###sample the one with the best reward
     def sample(self, batch_size):

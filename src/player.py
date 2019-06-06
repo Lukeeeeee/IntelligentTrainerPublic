@@ -354,35 +354,48 @@ class RandomEnsemblePlayer(Basic):
                 self.cumulative_target_agent_real_env_sample_count = 0
                 for player in self.player_list:
                     player.agent.remain_action_flag = False
+                print("raw reward=", [np.sum(self.sample_list[i].reward_set) for i in range(self.player_count)])
                 rank_list = np.argsort([np.sum(self.sample_list[i].reward_set) for i in range(self.player_count)])
-                reward_factor = (cfg.config_dict['max_samP']-cfg.config_dict['SAMPLER_PROB'])/(cfg.config_dict['max_samP']-self.reference_samp[0])
+                reward_factor = (1-cfg.config_dict['SAMPLER_PROB'])
                 reward_factor = reward_factor**2
-                if reward_factor <= cfg.config_dict['ZeroThre']:
+                if cfg.config_dict['SAMPLER_PROB'] > cfg.config_dict['ZeroThre']:
                     reward_factor = 0
-                for i in range(len(self.sample_list)):
-                    self.sample_list[rank_list[i]].reward_set[-1] = reward_factor*float(i)
-                    ####
-                    if np.isnan(self.sample_list[rank_list[i]].reward_set[-1]):
-                        print("Nan observed")
+                # print("In Player before fake sampling action_iterator=",
+                #       self.player_list[0].agent.model.action_iterator)
+                print("reward_factor=", reward_factor)
+                if reward_factor > 0:
+                    for i in range(len(self.sample_list)):
+                        self.sample_list[rank_list[i]].reward_set[-1] = reward_factor*float(i)
+                        ####
+                        if np.isnan(self.sample_list[rank_list[i]].reward_set[-1]):
+                            print("Nan observed")
+                        # print("In Player before fake sampling action_iterator=",
+                        #       self.player_list[0].agent.model.action_iterator)
+                        if self.pre_sample_list:
+                            self.sample_list[i].action_set[-1][0:2] = self.pre_sample_list[i].action_set[-1][0:2]
+                        # print("In Player before fake sampling action_iterator=",
+                        #       self.player_list[0].agent.model.action_iterator)
+                        self.reward_his[rank_list[i]].append(reward_factor*float(i))
+                    print("new rank reward*reward factor=", [self.reward_his[i][-1] for i in range(len(self.sample_list))])
+                    for i in range(len(self.player_list)):
+                        self.sample_list[i].state_set = self.sample_list[i].state_set[-1:]
+                        self.sample_list[i].action_set = self.sample_list[i].action_set[-1:]
+                        self.sample_list[i].reward_set = self.sample_list[i].reward_set[-1:]
+                        self.sample_list[i].done_set = self.sample_list[i].done_set[-1:]
+                        self.sample_list[i].new_state_set = self.sample_list[i].new_state_set[-1:]
+                        self.sample_list[i].step_count_per_episode = 1
+                        self.sample_list[i].cumulative_reward = self.sample_list[i].reward_set[-1]
 
-                    if self.pre_sample_list:
-                        self.sample_list[i].action_set[-1][0:2] = self.pre_sample_list[i].action_set[-1][0:2]
-                    self.reward_his[rank_list[i]].append(reward_factor*float(i))
-
-                for i in range(len(self.player_list)):
-                    self.sample_list[i].state_set = self.sample_list[i].state_set[-1:]
-                    self.sample_list[i].action_set = self.sample_list[i].action_set[-1:]
-                    self.sample_list[i].reward_set = self.sample_list[i].reward_set[-1:]
-                    self.sample_list[i].done_set = self.sample_list[i].done_set[-1:]
-                    self.sample_list[i].new_state_set = self.sample_list[i].new_state_set[-1:]
-                    self.sample_list[i].step_count_per_episode = 1
-                    self.sample_list[i].cumulative_reward = self.sample_list[i].reward_set[-1]
-                for i in range(self.player_count):
-                    self._store_sample_except(sample=self.sample_list[i],
-                                              except_list=())
-                    self.pre_sample_list = dp(self.sample_list)
+                    for i in range(self.player_count):
+                        self._store_sample_except(sample=self.sample_list[i],
+                                                  except_list=())
+                        print("Newly got sample: action={}, reward={}".format(self.sample_list[i].action_set, self.sample_list[i].reward_set))
+                        self.pre_sample_list = dp(self.sample_list)
                 self.sample_list = None
                 self.step_count += 1
+            else:
+                for player in self.player_list:
+                    player.agent.remain_action_flag = True
         else:
             for i in range(self.player_count):
                 self.reward_his[i].append(self.sample_list[i].reward_set[-1])
@@ -392,53 +405,40 @@ class RandomEnsemblePlayer(Basic):
             self.step_count += 1
 
         NC = cfg.config_dict['NC']
-        clearFlag = False
         copy_event = []
+        print("self.reward_his[0]=", self.reward_his[0])
+        # print("In Player before fake sampling action_iterator=", self.player_list[0].agent.model.action_iterator)
         if len(self.reward_his[0]) >= NC:
-            # every NC reward a test
             best_index, acc_reward = self._get_best_index_acc_reward()
             self.best_index = best_index
+            print("self.best_index=", self.best_index)
             worst_reward = np.min(acc_reward)
             if sum(acc_reward-worst_reward)==0:
                 advan_ratio = 0.5
             else:
                 advan_ratio = (acc_reward[best_index]-worst_reward)/sum(acc_reward-worst_reward)
-            if "WorstRatio" in cfg.config_dict:
-                if cfg.config_dict["WorstRatio"]:
-                    median_reward = sum(acc_reward)-acc_reward[best_index]-worst_reward
-                    worst_ratio = (acc_reward[best_index]-worst_reward) / (acc_reward[best_index]-median_reward)
-                    if worst_ratio >= 4:
-                        for i in range(self.player_count):
-                            if acc_reward[i]==worst_reward:
-                                self.player_list[i].env.target_agent.model.copy_model(
-                                    self.player_list[best_index].env.target_agent.model)
-                                copy_event.append((best_index, i))
-                        print("Weigh copy finish, best player: %d" % best_index)
-                        clearFlag = True
 
-            self.reference_samp[1] = (((advan_ratio - 0.5) / (cfg.config_dict['BestThre'] - 0.5)) **
-                                               cfg.config_dict['POW']) * cfg.config_dict['max_samP']
+            self.reference_samp[1] = (((advan_ratio - 0.5) / cfg.config_dict['phiRange']) **
+                                               cfg.config_dict['POW']) * 1
 
             self.reference_samp[1] = min(self.reference_samp[1], cfg.config_dict['max_samP'])
 
-            # if advan_ratio >= cfg.config_dict['BestThre']:
-            #     cfg.config_dict['COPY_PARTLY'] = True
-            # else:
-            #     cfg.config_dict['COPY_PARTLY'] =False
+            if cfg.config_dict['Sig_PREF']:
+                self.reference_samp[1] = sigmoid((advan_ratio-0.5-cfg.config_dict['phiRange']/2.0)*40.0)
 
+            print("advan_ratio=", advan_ratio)
+            ####added intel trainer based evaluation
+            print("EValution to all actions=")
+            self.player_list[0].agent.model.evluate_actions(self.player_list[0].env._get_obs())
             if advan_ratio >= cfg.config_dict['BestThre']:
                 for i in range(self.player_count):
                     if i != best_index:
-                        # TODO PARTLY COPY FLAG
-                        if 'COPY_PARTLY' in cfg.config_dict and cfg.config_dict['COPY_PARTLY'] is True and i == 1:
-                            continue
-                        else:
+                        if i == 0:
+                            print("Weight transferred")
                             self.player_list[i].env.target_agent.model.copy_model(
                                 self.player_list[best_index].env.target_agent.model)
                             copy_event.append((best_index, i))
-                print("Weigh copy finish, best player: %d" % best_index)
-                clearFlag = True
-
+                print("Weight copy finish, best player: %d" % best_index)
 
             for player in self.player_list:
                 player.log_file_content.append({
@@ -452,6 +452,8 @@ class RandomEnsemblePlayer(Basic):
 
             self.log_print_count = self.log_print_count + 1
 
+        print("self.reference_samp[1]=", self.reference_samp[1])
+
         if self.cumulative_target_agent_real_env_sample_count / 3 < 10 and cfg.config_dict['RRThre']/3 < 30:
             self.reference_samp[1] = 0
             self.reference_samp[0] = 0
@@ -462,19 +464,14 @@ class RandomEnsemblePlayer(Basic):
         else:
             cfg.config_dict['SAMPLER_PROB'] = self.reference_samp[1]
 
-
-        if clearFlag is True:
-            # clear old sample reward
-
-            for i in range(self.player_count):
-                self.reward_his[i] = []
+        # print("In Player before fake sampling action_iterator=", self.player_list[0].agent.model.action_iterator)
 
         # Limit length of reward his
 
-        while len(self.reward_his[0]) > cfg.config_dict['MAX_RE_LEN']:
+        if len(self.reward_his[0]) > cfg.config_dict['NC']:
             for i in range(self.player_count):
-                self.reward_his[i].pop(0)
-
+                self.reward_his[i] = []
+        # print("In Player before fake sampling action_iterator=", self.player_list[0].agent.model.action_iterator)
         if 'STE_V3_TEST_MOVE_OUT' in cfg.config_dict and cfg.config_dict['STE_V3_TEST_MOVE_OUT'] is True:
             self.test()
 

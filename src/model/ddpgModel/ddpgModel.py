@@ -1,10 +1,9 @@
-try:
-    from baselines.ddpg.ddpg import DDPG as baseline_ddpg
-    from src.model.ddpgModel.thirdPartCode.openAIBaselinesModel import Actor, Critic
-    from baselines.ddpg.memory import Memory
-    from baselines.ddpg.noise import *
-except ImportError as e:
-    print("Import baseline DDPG error!!!!!!!!")
+
+from baselines.ddpg.ddpg import DDPG as baseline_ddpg
+from src.model.ddpgModel.thirdPartCode.openAIBaselinesModel import Actor, Critic
+from baselines.ddpg.memory import Memory
+from baselines.ddpg.noise import *
+
 
 from conf.key import CONFIG_KEY
 from src.config.config import Config

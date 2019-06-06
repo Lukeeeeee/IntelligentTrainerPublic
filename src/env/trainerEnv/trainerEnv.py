@@ -55,11 +55,6 @@ class TrainerEnv(BaselineTrainerEnv):
     def step(self, action):
         return self.stepper.step(env=self, action=action)
 
-    def _get_reward(self, action):
-
-        re = np.sign(self.real_r_his[-1] - self.real_r_his[-2])
-
-        return re
 
     def _get_obs(self):
         if self.config.config_dict['TRAINER_ENV_STEP_TYPE'] == 'REWARD_DIFFER_REAL_CYBER_MEAN_REWARD_V3':

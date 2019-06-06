@@ -8,7 +8,7 @@
   "DISCOUNT": 0.99,
   "ITERATION_EVER_EPOCH": 4,
   "LEARNING_RATE": 0.1,
-  "MEMORY_SIZE": 2000,
+  "MEMORY_SIZE": 32,
   "NAME": "TrainerDQN",
   "NET_CONFIG": [
     {
