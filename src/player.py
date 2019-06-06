@@ -133,117 +133,6 @@ class GamePlayer(Basic):
         pass
 
 
-class AssembleGamePlayer(object):
-    def __init__(self, intel_player, ref_player_list):
-        self.main_player = intel_player
-        self.reference_players = ref_player_list
-        pass
-
-    @property
-    def real_env_sample_count(self):
-        return self.main_player.env.target_agent._real_env_sample_count
-
-    def play(self, seed_new=None):
-        self.main_player.set_seed(seed_new)
-        for player in self.reference_players:
-            player.set_seed(seed_new)
-
-        self.main_player.save_config()
-        for player in self.reference_players:
-            player.save_config()
-
-        self.main_player.init()
-        for player in self.reference_players:
-            player.init()
-
-        #####combine memory first before each step.
-
-        for i in range(self.main_player.config.config_dict['EPOCH']):
-            for j in range(self.main_player.config.config_dict['STEP']):
-                print("\nEPOCH %d, STEP %d" % (i, j))
-                self.main_player.step()
-                for player in self.reference_players:
-                    player.step()
-                print("self.config.config_dict['MAX_REAL_ENV_SAMPLE']=",
-                      self.main_player.config.config_dict['MAX_REAL_ENV_SAMPLE'])
-                print("self.env.target_agent._real_env_sample_count=",
-                      self.real_env_sample_count)
-                if self.real_env_sample_count + self.main_player.env.config.config_dict[
-                    'SAMPLE_COUNT_PER_STEP'] > self.main_player.config.config_dict[
-                    'MAX_REAL_ENV_SAMPLE'] * self.main_player.config.config_dict['REAL_ENV_SAMPLE_TRAIN_RATION']:
-                    break
-            if self.real_env_sample_count + self.main_player.env.config.config_dict[
-                'SAMPLE_COUNT_PER_STEP'] > self.main_player.config.config_dict[
-                'MAX_REAL_ENV_SAMPLE'] * self.main_player.config.config_dict['REAL_ENV_SAMPLE_TRAIN_RATION']:
-                break
-        self.print_log_to_file()
-        self.save_all_model()
-        self.final_test_process()
-
-    def print_log_to_file(self):
-        self.main_player.print_log_to_file()
-        for player in self.reference_players:
-            player.print_log_to_file()
-
-    def save_all_model(self):
-        self.main_player.save_all_model()
-        for player in self.reference_players:
-            player.save_all_model()
-
-    def final_test_process(self):
-        test_sample_real_env_count = self.main_player.config.config_dict['MAX_REAL_ENV_SAMPLE'] - \
-                                     self.real_env_sample_count
-
-        target_agent_count = 1 + len(self.reference_players)
-        test_sample_per_target_agent = int(test_sample_real_env_count // target_agent_count)
-
-        best_reward = -1000000.0
-        best_player = None
-        print('Real env used %d Test sample for each player %d\n' % (
-            self.real_env_sample_count, test_sample_per_target_agent))
-        reward = self._test_agent(env=self.main_player.env.test_env,
-                                  target_agent=self.main_player.env.target_agent,
-                                  test_sample_per_agent=test_sample_per_target_agent
-                                  )
-        print("Mean Reward of %s is %f" % (self.main_player.env.target_agent.config.config_dict['NAME'], reward))
-        if reward > best_reward:
-            best_reward = reward
-            best_player = self.main_player
-        for player in self.reference_players:
-            reward = self._test_agent(env=player.env.test_env,
-                                      target_agent=player.env.target_agent,
-                                      test_sample_per_agent=test_sample_per_target_agent
-                                      )
-            print("Mean Reward of %s is %f" % (player.env.target_agent.config.config_dict['NAME'], reward))
-
-            if reward > best_reward:
-                best_reward = reward
-                best_player = player
-
-        print("Best player is %s its reward is %f" % (
-            best_player.env.target_agent.config.config_dict['NAME'], best_reward))
-
-        best_player.env.target_agent.status = best_player.env.target_agent.status_key['TEST']
-        best_reward_log_content = best_player.env.target_agent.log_file_content
-        file_name = best_player.env.target_agent.config.config_dict['NAME'] + '_BEST_AGENT_TEST_REWARD.json'
-
-        self.main_player.logger.out_to_file(
-            file_path=os.path.join(self.main_player.logger.loss_file_log_dir, file_name),
-            content=best_reward_log_content)
-        for player in self.reference_players:
-            player.logger.out_to_file(
-                file_path=os.path.join(player.logger.loss_file_log_dir, file_name),
-                content=best_reward_log_content)
-
-    def _test_agent(self, env, target_agent, test_sample_per_agent):
-        target_agent.env_status = target_agent.config.config_dict['REAL_ENVIRONMENT_STATUS']
-        target_agent.status = target_agent.status_key['TEST']
-        test_data = target_agent.sample(env=env,
-                                        sample_count=test_sample_per_agent,
-                                        store_flag=False,
-                                        agent_print_log_flag=True)
-        mean_reward = float(np.mean(test_data.reward_set))
-        return mean_reward
 
 
 class RandomEnsemblePlayer(Basic):
@@ -422,9 +311,6 @@ class RandomEnsemblePlayer(Basic):
                                                cfg.config_dict['POW']) * 1
 
             self.reference_samp[1] = min(self.reference_samp[1], cfg.config_dict['max_samP'])
-
-            if cfg.config_dict['Sig_PREF']:
-                self.reference_samp[1] = sigmoid((advan_ratio-0.5-cfg.config_dict['phiRange']/2.0)*40.0)
 
             print("advan_ratio=", advan_ratio)
             ####added intel trainer based evaluation
