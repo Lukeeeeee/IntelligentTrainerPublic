@@ -9,10 +9,36 @@ from src.env.util import *
 import util.utilNew as util_new
 from conf.envBound import get_bound_file
 import tensorflow as tf
-from src.util.plotter import Plotter
 from util.utilNew import create_tmp_config_file
 import config as cfg
 import time
+from conf.configSet_Swimmer_Random_Ensemble_Intel import CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_INTEL, \
+    MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_INTEL
+
+from conf.configSet_Swimmer_Random_Ensemble_No_Dyna import CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_NO_DYNA, \
+    MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_NO_DYNA
+
+from conf.configSet_MountainCarContinuous_Ramdom_Ensemble_Intel import \
+    CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_INTEL, MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_INTEL
+
+from conf.configSet_MountainCarContinuous_Random_Ensemble_No_Dyna import \
+    CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_NO_CYBER, MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_NO_CYBER
+
+from conf.configSet_HalfCheetah_Ramdom_Ensemble_Intel import CONFIG_SET_HALFCHEETAH_INTEL, \
+    MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL
+from conf.configSet_HalfCheetah_Ramdom_Ensemble_No_Dyna import CONFIG_SET_HALFCHEETAH_INTEL_ENSEMBLE_NO_DYNA, \
+    MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL_ENSEMBLE_NO_DYNA
+
+from conf.configSet_Pendulum_Ramdom_Ensemble_Intel import CONFIG_SET_PENDULUM_INTEL, \
+    MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL
+from conf.configSet_Pendulum_Ramdom_Ensemble_No_Dyna import CONFIG_SET_PENDULUM_INTEL_ENSEMBLE_NO_DYNA, \
+    MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL_ENSEMBLE_NO_DYNA
+
+
+from conf.configSet_Reacher_Random_Ensemble_Intel import CONFIG_SET_REACHER_INTEL_ENSEMBLE, \
+    MODEL_NET_WORK_CONFIG_DICT_REACHER_INTEL_ENSEMBLE
+from conf.configSet_Reacher_Random_Ensemble_No_Dyna import CONFIG_SET_REACHER_NO_DYNA_ENSEMBLE, \
+    MODEL_NET_WORK_CONFIG_DICT_REACHER_NO_DYNA_ENSEMBLE
 
 
 def run_multiple_experiments(game_env_name, cuda_device, player_config_path_list, player_target_model_type_list, num,
@@ -25,7 +51,7 @@ def run_multiple_experiments(game_env_name, cuda_device, player_config_path_list
     cfg.config_dict = {
         'NOT_TRPO_CLEAR_MEMORY': False,
         'STE_V3_TEST_MOVE_OUT': True,
-        'NC': 3,   ###100 for Mcar
+        'NC': 3,  ###100 for Mcar
         # 'DISCOUNT': 0.99,
         'SAMPLER_PROB': 0.0,
         'LINEAR_DISCOUNT': 0.7,
@@ -85,114 +111,48 @@ def run_multiple_experiments(game_env_name, cuda_device, player_config_path_list
         print(log)
 
 
+env_config_dict = {
+    "Pendulum-v0": ((CONFIG_SET_PENDULUM_INTEL, MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL),
+                                 (CONFIG_SET_PENDULUM_INTEL_ENSEMBLE_NO_DYNA, MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL_ENSEMBLE_NO_DYNA),
+                                 (CONFIG_SET_PENDULUM_INTEL, MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL)),
+    "MountainCarContinuous-v0": ((CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_INTEL, MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_INTEL),
+                   (CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_NO_CYBER, MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_NO_CYBER),
+                   (CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_INTEL, MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_INTEL)),
+    "Reacher-v1": ((CONFIG_SET_REACHER_INTEL_ENSEMBLE, MODEL_NET_WORK_CONFIG_DICT_REACHER_INTEL_ENSEMBLE),
+                   (CONFIG_SET_REACHER_NO_DYNA_ENSEMBLE, MODEL_NET_WORK_CONFIG_DICT_REACHER_NO_DYNA_ENSEMBLE),
+                   (CONFIG_SET_REACHER_INTEL_ENSEMBLE, MODEL_NET_WORK_CONFIG_DICT_REACHER_INTEL_ENSEMBLE)),
+    "HalfCheetah": ((CONFIG_SET_HALFCHEETAH_INTEL, MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL),
+                    (CONFIG_SET_HALFCHEETAH_INTEL_ENSEMBLE_NO_DYNA, MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL_ENSEMBLE_NO_DYNA),
+                    (CONFIG_SET_HALFCHEETAH_INTEL, MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL)),
+    "Swimmer-v1": ((CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_INTEL,
+                    MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_INTEL),
+                   (CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_NO_DYNA,
+                    MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_NO_DYNA),
+                   (CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_INTEL,
+                    MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_INTEL))
+}
+
+model_type_dict = {
+    "Pendulum-v0": (('DQN', 'DDPG'), ('FIX', 'DDPG'), ('RANDOM', 'DDPG')),
+    "MountainCarContinuous-v0": (('DQN', 'DDPG'), ('FIX', 'DDPG'), ('RANDOM', 'DDPG')),
+    "Reacher-v1": (('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
+    "HalfCheetah": (('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
+    "Swimmer-v1": (('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
+}
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--env', type=str)
+parser.add_argument('--cuda_id', type=int, default=0)
+parser.add_argument('--num', type=int, default=1)
+parser.add_argument('--exp_end', type=str, default='debug')
+
 if __name__ == '__main__':
-    from conf.configSet_Swimmer_Random_Ensemble_Intel import CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_INTEL, \
-        MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_INTEL
-    from conf.configSet_Swimmer_Random_Ensemble_Full_Cyber import CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_FULL_CYBER, \
-        MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_FULL_CYBER
-    from conf.configSet_Swimmer_Random_Ensemble_No_Dyna import CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_NO_DYNA, \
-        MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_NO_DYNA
-
-    from conf.configSet_MountainCarContinuous_Ramdom_Ensemble_Intel import \
-        CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_INTEL, MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_INTEL
-    from conf.configSet_MountainCarContinuous_Random_Ensemble_Full_Cyber import \
-        CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_FULL_CYBER, \
-        MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_FULL_CYBER
-    from conf.configSet_MountainCarContinuous_Random_Ensemble_No_Dyna import \
-        CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_NO_CYBER, MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_NO_CYBER
-
-    from conf.configSet_HalfCheetah_Ramdom_Ensemble_Intel import CONFIG_SET_HALFCHEETAH_INTEL, \
-        MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL
-    from conf.configSet_HalfCheetah_Ramdom_Ensemble_Full_Cyber import CONFIG_SET_HALFCHEETAH_INTEL_ENSEMBLE_FULL_CYBER, \
-        MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL_ENSEMBLE_FULL_CYBER
-    from conf.configSet_HalfCheetah_Ramdom_Ensemble_No_Dyna import CONFIG_SET_HALFCHEETAH_INTEL_ENSEMBLE_NO_DYNA, \
-        MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL_ENSEMBLE_NO_DYNA
-
-    from conf.configSet_Pendulum_Ramdom_Ensemble_Intel import CONFIG_SET_PENDULUM_INTEL, \
-        MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL
-    from conf.configSet_Pendulum_Ramdom_Ensemble_No_Dyna import CONFIG_SET_PENDULUM_INTEL_ENSEMBLE_NO_DYNA, \
-        MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL_ENSEMBLE_NO_DYNA
-    from conf.configSet_Pendulum_Ramdom_Ensemble_Full_Cyber import CONFIG_SET_PENDULUM_INTEL_FULL_CYBER, \
-        MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL_ENSEMBLE_FULL_CYBER
-
-    from conf.configSet_Reacher_Random_Ensemble_Intel import CONFIG_SET_REACHER_INTEL_ENSEMBLE, \
-        MODEL_NET_WORK_CONFIG_DICT_REACHER_INTEL_ENSEMBLE
-    from conf.configSet_Reacher_Random_Ensemble_No_Dyna import CONFIG_SET_REACHER_NO_DYNA_ENSEMBLE, \
-        MODEL_NET_WORK_CONFIG_DICT_REACHER_NO_DYNA_ENSEMBLE
-    from conf.configSet_Reacher_Random_Ensemble_Full_Cyber import CONFIG_SET_REACHER_FULL_CYBER_ENSEMBLE, \
-        MODEL_NET_WORK_CONFIG_DICT_REACHER_FULL_CYBER_ENSEMBLE
-    #
-    run_multiple_experiments(game_env_name='Swimmer-v1',
-                            cuda_device=-1,
-                            player_config_path_list=(
-                                (CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_INTEL,
-                                 MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_INTEL),
-                                (CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_NO_DYNA,
-                                 MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_NO_DYNA),
-                                (CONFIG_SET_SWIMMER_RANDOM_ENSEMBLE_INTEL,
-                                 MODEL_NET_WORK_CONFIG_DICT_SWIMMER_RANDOM_ENSEMBLE_INTEL)),
-                            player_target_model_type_list=(('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
-                            num=1,
-                            seed=None,
-                            exp_end_with='EnsFinalX')
-                            #exp_end_with='debug')
-
-    # run_multiple_experiments(game_env_name='Reacher-v1',
-    #                           cuda_device=-1,
-    #                           player_config_path_list=(
-    #                               (CONFIG_SET_REACHER_INTEL_ENSEMBLE,
-    #                                MODEL_NET_WORK_CONFIG_DICT_REACHER_INTEL_ENSEMBLE),
-    #                               (CONFIG_SET_REACHER_NO_DYNA_ENSEMBLE,
-    #                                MODEL_NET_WORK_CONFIG_DICT_REACHER_NO_DYNA_ENSEMBLE),
-    #                               (CONFIG_SET_REACHER_INTEL_ENSEMBLE,
-    #                                MODEL_NET_WORK_CONFIG_DICT_REACHER_INTEL_ENSEMBLE)),
-    #                           player_target_model_type_list=(('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
-    #                           num=1,
-    #                           seed=None,
-    #                           exp_end_with='EnsFinalX')
-    #                           # exp_end_with='debug')
-    # #
-    # run_multiple_experiments(game_env_name='Pendulum-v0',
-    #                          cuda_device=0,
-    #                          player_config_path_list=(
-    #                              (CONFIG_SET_PENDULUM_INTEL,
-    #                               MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL),
-    #                              (CONFIG_SET_PENDULUM_INTEL_ENSEMBLE_NO_DYNA,
-    #                               MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL_ENSEMBLE_NO_DYNA),
-    #                              (CONFIG_SET_PENDULUM_INTEL,
-    #                               MODEL_NET_WORK_CONFIG_DICT_PENDULUM_INTEL)),
-    #                          player_target_model_type_list=(('DQN', 'DDPG'), ('FIX', 'DDPG'), ('RANDOM', 'DDPG')),
-    #                          num=1,
-    #                          seed=None,
-    #                          exp_end_with='EnsFinalX')
-    #                          # exp_end_with='debug')
-    # # #
-    # run_multiple_experiments(game_env_name='MountainCarContinuous-v0',
-    #                          cuda_device=-1,
-    #                          player_config_path_list=(
-    #                              (CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_INTEL,
-    #                               MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_INTEL),
-    #                              (CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_NO_CYBER,
-    #                               MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_NO_CYBER),
-    #                              (CONFIG_SET_MOUNTAIN_CAR_CONTINUOUS_CONFIG_INTEL,
-    #                               MODEL_NET_WORK_CONFIG_DICT_MOUNTAIN_CAR_CONTINUOUS_INTEL),
-    #                          ),
-    #                          player_target_model_type_list=(('DQN', 'DDPG'), ('FIX', 'DDPG'), ('RANDOM', 'DDPG')),
-    #                          num=1,
-    #                          seed=None,
-    #                          exp_end_with='EnsFinalX')
-    #                          # exp_end_with='debug')
-    #
-    # run_multiple_experiments(game_env_name='HalfCheetah',
-    #                          cuda_device=-1,
-    #                          player_config_path_list=(
-    #                              (CONFIG_SET_HALFCHEETAH_INTEL,
-    #                               MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL),
-    #                              (CONFIG_SET_HALFCHEETAH_INTEL_ENSEMBLE_NO_DYNA,
-    #                               MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL_ENSEMBLE_NO_DYNA),
-    #                              (CONFIG_SET_HALFCHEETAH_INTEL,
-    #                               MODEL_NET_WORK_CONFIG_DICT_HALFCHEETAH_INTEL)),
-    #                          player_target_model_type_list=(('DQN', 'TRPO'), ('FIX', 'TRPO'), ('RANDOM', 'TRPO')),
-    #                          num=1,
-    #                          exp_end_with='EnsFinalX')
-    #                          # exp_end_with='debug')
+    args = parser.parse_args()
+    run_multiple_experiments(game_env_name=args.env,
+                             cuda_device=args.cuda_id,
+                             player_config_path_list=env_config_dict[args.env],
+                             player_target_model_type_list=model_type_dict[args.env],
+                             num=args.num,
+                             seed=None,
+                             exp_end_with=args.exp_end)
